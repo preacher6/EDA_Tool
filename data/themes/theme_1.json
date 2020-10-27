@@ -55,7 +55,7 @@
         "images":
                {
             "normal_image": {
-                "path": "examples/pics/icons/play.png"
+                "path": "pics/icons/play.png"
             }
         }
     },    
@@ -64,7 +64,7 @@
         "images":
                {
             "normal_image": {
-                "path": "examples/pics/icons/playone.png"
+                "path": "pics/icons/playone.png"
             }
         }
     },
@@ -74,7 +74,7 @@
         "images":
                {
             "normal_image": {
-                "path": "examples/pics/icons/code.png"
+                "path": "pics/icons/code.png"
             }
         }
     },    
@@ -83,7 +83,7 @@
         "images":
                {
             "normal_image": {
-                "path": "examples/pics/icons/save.png"
+                "path": "pics/icons/save.png"
             }
         }
     },        
@@ -92,7 +92,7 @@
         "images":
                {
             "normal_image": {
-                "path": "examples/pics/icons/load.png"
+                "path": "pics/icons/load.png"
             }
         }
     },
@@ -101,7 +101,7 @@
         "images":
                {
             "normal_image": {
-                "path": "examples/pics/icons/editar.png"
+                "path": "pics/icons/editar.png"
             }
         }
     },
@@ -110,7 +110,7 @@
         "images":
                {
             "normal_image": {
-                "path": "examples/pics/icons/desconectar.png"
+                "path": "pics/icons/desconectar.png"
             }
         }
     },
@@ -119,7 +119,7 @@
         "images":
                {
             "normal_image": {
-                "path": "examples/pics/icons/mover.png"
+                "path": "pics/icons/mover.png"
             }
         }
     },
@@ -128,7 +128,7 @@
         "images":
                {
             "normal_image": {
-                "path": "examples/pics/icons/borrar.png"
+                "path": "pics/icons/borrar.png"
             }
         }
     },
@@ -137,7 +137,7 @@
         "images":
         {
             "normal_image": {
-                "path": "examples/pics/icons/new.png"
+                "path": "pics/icons/new.png"
             }
         },
         "misc":
@@ -150,7 +150,7 @@
         "images":
         {
             "normal_image": {
-                "path": "examples/pics/icons/del.png"
+                "path": "pics/icons/del.png"
             }
         },
         "misc":
@@ -163,7 +163,7 @@
         "images":
         {
             "normal_image": {
-                "path": "examples/pics/icons/rename.png"
+                "path": "pics/icons/rename.png"
             }
         },
         "misc":
