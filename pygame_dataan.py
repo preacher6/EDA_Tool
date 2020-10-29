@@ -38,12 +38,12 @@ class PGData:
         self.is_running = True
         self.background = pygame.Surface((800, 600))
         self.background.fill(pygame.Color('#000000'))
-        
+
     @staticmethod
     def initialize_pygame():
         pygame.init()
         os.environ['SDL_VIDEO_CENTERED'] = '1'  # Centra la interfaz
-        pygame.display.set_caption('Data analysis')
+        pygame.display.set_caption('EDA Pipeline')
 
     def run(self):
         worker = MainWorker()
@@ -63,8 +63,10 @@ class PGData:
                     if gui_manager.selected_block:
                         for modulo in worker.modulos:
                             if modulo.id == 1:
-                                datablock = DataBlock(position_mouse, gui_manager.selected_item)
-                                modulo.data_ingesta.add(datablock)
+                                datablock = DataBlock(position_mouse, gui_manager.selected_item,
+                                type=gui_manager.selected_type)
+                                modulo.data_blocks.add(datablock)
+                                gui_manager.selected_block = False
                 if event.type == pygame.USEREVENT:                    
                     gui_manager.check_event(event, position_mouse, worker)
                 gui_manager.manager.process_events(event)

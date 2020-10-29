@@ -38,9 +38,10 @@ class GuiManager:
         self.explor_datos = ['Descripción', 'Tabla', 'Tipos de datos','Comportamiento']
         self.limp_datos = ['Eliminar Nan', 'Reemplazar Nan']
         self.anali_datos = ['Univariante', 'Multivariante', 'Correlación']
-        self.transf_data = ['Agregar', 'Unir', 'Pivote', 'Filtrar', 'Particionar', 'PCA', 'ICA']
+        self.transf_data = ['Agregar', 'Unir', 'Remodelar', 'Pivote', 'Filtrar', 'Particionar', 'PCA', 'ICA']
         self.expor_datos = ['CSV']
-        self.selected_item = 'CSV'
+        self.selected_type = self.items_choose[0]
+        self.selected_item = 'database'
         self.items_list = [self.items_choose[0], self.ing_datos[0]]
         self.proc_datos = ['Explorar datos', 'Limpiar datos', 'Transformar datos']
         
@@ -61,13 +62,7 @@ class GuiManager:
                                                         (210, 30)),
                                             self.manager,
                                             container=self.panel_objects)
-        self.ini_segmenu = 'Ficheros'
-        self.segundo_menu = UIDropDownMenu(self.ing_datos,
-                                            self.ini_segmenu,
-                                            pygame.Rect((10, 50),
-                                                        (210, 30)),
-                                            self.manager,
-                                            container=self.panel_objects)
+
         self.accion = UISelectionList(pygame.Rect(10, 100, 210, 140),
                                     item_list=self.ing_datos,
                                     manager=self.manager,
@@ -135,16 +130,6 @@ class GuiManager:
         self.workspace.fill(LIGHTGRAY)
         self.pos_workspace = (270, 160)
 
-    def reasign2(self, lista1, lista2):
-        #self.segundo_menu.kill() Esto permitia eliminar un objeto e instanciarlo de nuevo
-        self.ini_segmenu = lista1[0]
-        self.segundo_menu = UIDropDownMenu(lista1,
-                                            self.ini_segmenu,
-                                            pygame.Rect((10, 50),
-                                                        (210, 30)),
-                                            self.manager,
-                                            container=self.panel_objects)
-        self.accion.set_item_list(lista2)
 
     def reasign1(self, lista):
         self.accion.set_item_list(lista)
@@ -165,43 +150,29 @@ class GuiManager:
         if event.user_type == pygame_gui.UI_DROP_DOWN_MENU_CHANGED:
             if event.ui_element == self.primer_menu:  # Elección primera acción
                 if event.text == self.items_choose[0]:
+                    self.selected_type = self.items_choose[0]
                     self.reasign1(self.ing_datos)
+                    self.selected_item = 'database'
                 elif event.text == self.items_choose[1]:
+                    self.selected_type = self.items_choose[1]
                     self.reasign1(self.explor_datos)
-                elif event.text == self.items_choose[2]:
-                    self.reasign1(self.limp_datos)
-                elif event.text == self.items_choose[3]:
-                    self.reasign1(self.anali_datos)
-                elif event.text == self.items_choose[4]:
-                    self.reasign1(self.transf_data)
-                elif event.text == self.items_choose[5]:
-                    self.reasign1(self.expor_datos)
-
-            if event.ui_element == self.segundo_menu:  # Elección segunda acción
-                if event.text == self.ing_datos[0]:  # ingesta datos
-                    self.selected_item = 'csv'
-                    self.reasign1(self.ficheros)
-                elif event.text == self.ing_datos[1]:
-                    self.selected_item = 'csv'
-                    self.reasign1(self.data_toy)
-                elif event.text == self.ing_datos[2]:
-                    self.items_list[1] = self.ing_datos[2]
-                    self.reasign1(self.ficheros)    
-
-                if event.text == self.proc_datos[0]:  # Procesamiento data
                     self.selected_item = 'describir'
-                    self.reasign1(self.exp_datos)
-                elif event.text == self.proc_datos[1]:
+                elif event.text == self.items_choose[2]:
+                    self.selected_type = self.items_choose[2]
                     self.reasign1(self.limp_datos)
-                elif event.text == self.proc_datos[2]:
+                    self.selected_item = 'limpiar'
+                elif event.text == self.items_choose[3]:
+                    self.selected_type = self.items_choose[3]
+                    self.reasign1(self.anali_datos)
+                    self.selected_item = 'analizar'
+                elif event.text == self.items_choose[4]:
+                    self.selected_type = self.items_choose[4]
                     self.reasign1(self.transf_data)
-                
-                if event.text == self.entrenar[0]:  # Entrenar
-                    self.reasign1(self.clasificar)
-                elif event.text == self.entrenar[1]:
-                    self.reasign1(self.regresion)
-                elif event.text == self.entrenar[2]:
-                    self.reasign1(self.agrupar)
+                    self.selected_item = 'transformar'
+                elif event.text == self.items_choose[5]:
+                    self.selected_type = self.items_choose[5]
+                    self.reasign1(self.expor_datos)
+                    self.selected_item = 'exportar'
 
     def draw_selected(self, screen, position):
         self.datablock.hot_draw(screen, position)

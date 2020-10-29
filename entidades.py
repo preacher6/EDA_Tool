@@ -22,19 +22,24 @@ GRAY = (128, 128, 128)
 
 class DataBlock(pygame.sprite.Sprite):
     """Maneja cada bloque"""
-    def __init__(self, position, name, id='', status=False):
+    def __init__(self, position, name, id='', status=False, type=None):
         pygame.sprite.Sprite.__init__(self)
         self.position = position
         self.name = name  # Indica el nombre del icono
         self.id = id
         self.status = status
-        self.dir_images = {'csv': 'pics/icons/csv.png',
-                            'xls': 'pics/icons/xls.png',
-                            'describir': 'pics/icons/describir.png'}
+        self.type = type
+        self.dir_images = {'database': 'pics/icons/database.png',
+                            'describir': 'pics/icons/describir.png',
+                            'limpiar': 'pics/icons/limpiar.png',
+                            'analizar': 'pics/icons/analizar.png',
+                            'transformar': 'pics/icons/transformar.png',
+                            'exportar': 'pics/icons/exportar.png'}
         self.image = pygame.image.load(os.path.join('pics', 'images', 'block.png'))
         self.path_status = {'on': 'pics/images/on.png',
-                            'off': 'pics/images/on.png'}
-        self.image_status = pygame.image.load(os.path.join(self.path_status['on']))        
+                            'off': 'pics/images/off.png',
+                            'bad': 'pics/images/bad.png'}
+        self.image_status = pygame.image.load(os.path.join(self.path_status['off']))        
         self.agregar = pygame.image.load(os.path.join('pics/icons/agregar.png'))
         self.quitar = pygame.image.load(os.path.join('pics/icons/quitar.png'))
         self.botones = []
@@ -44,12 +49,17 @@ class DataBlock(pygame.sprite.Sprite):
         self.nodos = pygame.sprite.Group()
 
     def definir_nodos(self):
-        self.nodos.add(Nodo((self.rect.x-self.rect_nodo.width/2, self.rect.y+15)))
-        self.nodos.add(Nodo((self.rect.x+self.rect.width+self.rect_nodo.width/2, self.rect.y+15)))
+        if self.type != 'Ingesta':
+            self.nodos.add(Nodo((self.rect.x-self.rect_nodo.width/2, self.rect.y+15)))
+        if self.type != 'Exportar':
+            self.nodos.add(Nodo((self.rect.x+self.rect.width+self.rect_nodo.width/2, self.rect.y+15)))
 
     def rect_botones(self):
-        self.botones = []
-        posiciones = [(5, 3), (46, 3)]
+        self.botones = []        
+        if self.type == 'Ingesta':
+            posiciones = [(46, 3)]
+        else:
+            posiciones = [(5, 3), (46, 3)]
         lista = ['poner1', 'poner2']
         for poner, pos in zip(lista, posiciones):
             rect_agregar = self.agregar.get_rect()
@@ -58,7 +68,10 @@ class DataBlock(pygame.sprite.Sprite):
             self.botones.append([poner, rect_agregar])
             self.image.blit(self.agregar, pos)
 
-        posiciones = [(5, 17), (46, 17)]
+        if self.type == 'Ingesta':
+            posiciones = [(46, 17)]
+        else:
+            posiciones = [(5, 17), (46, 17)]
         lista = ['quitar1', 'quitar2']
         for quitar, pos in zip(lista, posiciones):
             rect_quitar = self.agregar.get_rect()
@@ -82,7 +95,7 @@ class DataBlock(pygame.sprite.Sprite):
             self.image_status = pygame.image.load(os.path.join(self.path_status['off']))
         self.rect_image()
         self.rect_botones()
-        self.definir_nodos()             
+        self.definir_nodos()   
         #self.image.blit(self.quitar, (5, 17))
         self.image.blit(self.image_status, (27, 10))
         self.image.blit(self.icon, (18, 53))        
@@ -91,6 +104,7 @@ class DataBlock(pygame.sprite.Sprite):
             nodo.draw(screen)
 
     def hot_draw(self, screen, position):
+        """Dibujar el bloque en caliente"""
         self.image = pygame.image.load(os.path.join('pics', 'images', 'block.png'))
         self.hot_rect_image(position)
         self.image.blit(self.icon, (18, 50))
@@ -106,7 +120,7 @@ class Nodo(pygame.sprite.Sprite):
     """Maneja cada modulo que se crea como una entidad independiente"""
     def __init__(self, position):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load(os.path.join('pics', 'images', 'nodo.png'))
+        self.image = pygame.image.load(os.path.join('pics', 'images', 'nodo_off.png'))
         self.rect = self.image.get_rect()
         self.rect.center = position
 
@@ -117,7 +131,7 @@ class Modulos(pygame.sprite.Sprite):
     """Maneja cada modulo que se crea como una entidad independiente"""
     def __init__(self, identidad):
         pygame.sprite.Sprite.__init__(self)
-        self.data_ingesta = pygame.sprite.Group()
+        self.data_blocks = pygame.sprite.Group()
         self.id = identidad
 
 
@@ -129,15 +143,13 @@ class MainWorker(pygame.sprite.Sprite):
 
     def draw_all(self, screen, position):
         for modulo in self.modulos:
-            for data in modulo.data_ingesta:
+            for data in modulo.data_blocks:
                 data.draw(screen)
                 for boton in data.botones:
                     if boton[1].collidepoint(position):
                         print('in')
 
     def add_nodo(self, screen, position, modulo):
-        for bloque in modulo.data_ingesta:
+        for bloque in modulo.data_blocks:
             for boton in bloque.botones:
                 pass
-
-
