@@ -14,7 +14,7 @@ from pygame_gui.elements import UIImage
 from pygame_gui.elements import UIPanel
 from pygame_gui.elements import UISelectionList
 from pygame_gui.windows import UIMessageWindow
-from entidades import DataBlock, Modulos, MainWorker
+from entidades import DataBlock, Modulos, MainWorker, Conexion
 from gui_manager import GuiManager
 from pygame.locals import *
 
@@ -50,16 +50,21 @@ class PGData:
         modulo = Modulos(1)
         worker.modulos.add(modulo)
         gui_manager = GuiManager()
+        position_mouse = (0, 0)  # Inicializar posicion presionad
+        init_pos = (0, 0)  # Posicion inicial de la conexion
+        draw_wire = False
+        elem_ini = None
         while self.is_running:
             keys = pygame.key.get_pressed()  # Obtencion de tecla presionada
             time_delta = self.clock.tick(60)/1000.0
-            position_mouse = pygame.mouse.get_pos()
+            
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.is_running = False
                 elif keys[K_ESCAPE]:  # Acciones al presionar tecla escape
                     gui_manager.cancel()
                 elif event.type == pygame.MOUSEBUTTONDOWN:
+                    position_mouse = pygame.mouse.get_pos()
                     if gui_manager.selected_block:
                         for modulo in worker.modulos:
                             if modulo.id == 1:
@@ -67,17 +72,44 @@ class PGData:
                                 type=gui_manager.selected_type)
                                 modulo.data_blocks.add(datablock)
                                 gui_manager.selected_block = False
+                    if draw_wire:
+                        for modulo in worker.modulos:
+                            if modulo.id == 1:
+                                for bloque in modulo.data_blocks:
+                                    for nodo in bloque.nodos:
+                                        if nodo.rect.collidepoint(position_mouse):
+                                            elem_fin = bloque
+                                            conexion = Conexion((init_pos, position_mouse),
+                                            elem_ini, elem_fin)
+                                            modulo.conections.add(conexion)
+                                            draw_wire = False
+
+                    if gui_manager.hold_line and not draw_wire:
+                        for modulo in worker.modulos:
+                            if modulo.id == 1:
+                                for bloque in modulo.data_blocks:
+                                    for nodo in bloque.nodos:
+                                        if nodo.rect.collidepoint(position_mouse):
+                                            draw_wire = True
+                                            init_pos = pygame.mouse.get_pos()
+                                            elem_ini = bloque
                 if event.type == pygame.USEREVENT:                    
                     gui_manager.check_event(event, position_mouse, worker)
+                    gui_manager.check_actions(position_mouse)
                 gui_manager.manager.process_events(event)
-            self.window_surface.fill(BLACK)
             abs_position = pygame.mouse.get_pos()  # Posición actual mouse
+            
+            self.window_surface.fill(BLACK)            
             gui_manager.manager.update(time_delta)
             self.window_surface.blit(self.background, (0, 0))
             gui_manager.manager.draw_ui(self.window_surface)
             gui_manager.draw_workspace(self.window_surface)
-            worker.draw_all(self.window_surface, abs_position)
+            if draw_wire:
+                gui_manager.draw_wire(self.window_surface, init_pos, abs_position)
             gui_manager.workspace.fill(LIGHTGRAY)
+            worker.draw_all(self.window_surface, abs_position)
+            
+            
             if gui_manager.selected_block:
                 gui_manager.draw_selected(self.window_surface, abs_position)
             pygame.display.update()

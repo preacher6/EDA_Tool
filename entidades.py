@@ -18,6 +18,7 @@ from pygame_gui.windows import UIMessageWindow
 LIGHTGRAY = (192, 192, 192)
 WHITE = (255, 255, 255)
 GRAY = (128, 128, 128)
+BLACK = (0, 0, 0)
 
 
 class DataBlock(pygame.sprite.Sprite):
@@ -47,6 +48,8 @@ class DataBlock(pygame.sprite.Sprite):
         self.image_nodo = pygame.image.load(os.path.join('pics', 'images', 'nodo.png'))
         self.rect_nodo = self.image_nodo.get_rect()
         self.nodos = pygame.sprite.Group()
+        self.rect_image()
+        self.definir_nodos()   
 
     def definir_nodos(self):
         if self.type != 'Ingesta':
@@ -55,6 +58,7 @@ class DataBlock(pygame.sprite.Sprite):
             self.nodos.add(Nodo((self.rect.x+self.rect.width+self.rect_nodo.width/2, self.rect.y+15)))
 
     def rect_botones(self):
+        
         self.botones = []        
         if self.type == 'Ingesta':
             posiciones = [(46, 3)]
@@ -95,7 +99,7 @@ class DataBlock(pygame.sprite.Sprite):
             self.image_status = pygame.image.load(os.path.join(self.path_status['off']))
         self.rect_image()
         self.rect_botones()
-        self.definir_nodos()   
+        
         #self.image.blit(self.quitar, (5, 17))
         self.image.blit(self.image_status, (27, 10))
         self.image.blit(self.icon, (18, 53))        
@@ -127,11 +131,31 @@ class Nodo(pygame.sprite.Sprite):
     def draw(self, screen):
         screen.blit(self.image, self.rect)
 
+class Conexion(pygame.sprite.Sprite):
+    def __init__(self, puntos, elem1, elem2):
+        pygame.sprite.Sprite.__init__(self)
+        self.puntos = puntos
+        print(self.puntos)
+        self.elem1 = elem1
+        self.elem2 = elem2  # Este elemento es una etiqueta si pertenece a las conexiones de propiedades, y es un numero si pertence a un elemento
+        self.puntos_internos = self.build_rect_points(puntos)
+    
+    def build_rect_points(self, puntos, num_points=20):  # Funcion recta. Construye los puntos de la recta para cada linea de una conexion
+        x1, y1 = puntos[0]
+        x2, y2 = puntos[1]
+        x_spacing = (x2-x1)/(num_points+1)
+        y_spacing = (y2 - y1) / (num_points + 1)
+        return [[x1+i*x_spacing, y1+i*y_spacing] for i in range(1, num_points+1)]
+    
+    def draw(self, screen):
+        pygame.draw.aaline(screen, BLACK, self.puntos[0], self.puntos[1])
+
 class Modulos(pygame.sprite.Sprite):
     """Maneja cada modulo que se crea como una entidad independiente"""
     def __init__(self, identidad):
         pygame.sprite.Sprite.__init__(self)
         self.data_blocks = pygame.sprite.Group()
+        self.conections = pygame.sprite.Group()  # Guarda las conexiones del contenedor
         self.id = identidad
 
 
@@ -148,6 +172,8 @@ class MainWorker(pygame.sprite.Sprite):
                 for boton in data.botones:
                     if boton[1].collidepoint(position):
                         print('in')
+            for conexion in modulo.conections:
+                conexion.draw(screen)
 
     def add_nodo(self, screen, position, modulo):
         for bloque in modulo.data_blocks:

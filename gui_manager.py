@@ -20,6 +20,7 @@ from entidades import DataBlock, Modulos, MainWorker
 LIGHTGRAY = (192, 192, 192)
 WHITE = (255, 255, 255)
 GRAY = (128, 128, 128)
+BLACK = (0, 0, 0)
 
 
 class GuiManager:
@@ -48,7 +49,9 @@ class GuiManager:
         self.validar = []
 
         self.selected_block = False  # Indica si se esta dibujando algun bloque en pantalla
-
+        self.tareas = [0]*5
+        self.editar = [0]*4
+        self.hold_line = False  # Dibujar arco para conectar elementos
         self.init_elements()
 
     def init_elements(self):
@@ -139,8 +142,19 @@ class GuiManager:
     
     def check_event(self, event, position, worker, image=None):
         if event.user_type == pygame_gui.UI_BUTTON_PRESSED:
-            if event.ui_object_id == 'panel.#2':
-                self.accion.set_item_list(['23', '3'])
+            print(event.ui_object_id)
+            for ind_x in range(1, 6):
+                """Recorrer acciones"""
+                if event.ui_object_id == 'panel.#p'+str(ind_x):
+                    self.cancel()
+                    self.tareas[ind_x-1] = 1
+
+            for ind_x in range(1, 5):
+                """Recorrer edicion"""
+                if event.ui_object_id == 'panel.#e'+str(ind_x):
+                    self.cancel()
+                    self.editar[ind_x-1] = 1
+
             if event.ui_element == self.select:  # Selecciona un objeto
                 self.selected_block = True
                 self.datablock = DataBlock(position, self.selected_item)
@@ -148,7 +162,7 @@ class GuiManager:
                     if modulo.id == 1:
                         modulo.data_ingesta.add(self.datablock)"""
         if event.user_type == pygame_gui.UI_DROP_DOWN_MENU_CHANGED:
-            if event.ui_element == self.primer_menu:  # Elección primera acción
+            if event.ui_element == self.primer_menu:  # Elección primera acción                
                 if event.text == self.items_choose[0]:
                     self.selected_type = self.items_choose[0]
                     self.reasign1(self.ing_datos)
@@ -177,5 +191,16 @@ class GuiManager:
     def draw_selected(self, screen, position):
         self.datablock.hot_draw(screen, position)
 
+    def check_actions(self, position):
+        if self.editar[0]:
+            self.hold_line = True
+
+    def draw_wire(self, screen, init_pos, end_line):
+        pygame.draw.aaline(screen, BLACK, init_pos, end_line)
+
     def cancel(self):
         self.selected_block = False
+        self.tareas = [0]*5
+
+    def load_rects(self):
+        pass
