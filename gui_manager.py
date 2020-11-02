@@ -37,9 +37,11 @@ class GuiManager:
         self.items_choose = ['Ingesta', 'Exploración', 'Limpieza', 'Análisis', 'Transformación', 'Exportar']        
         self.ing_datos = ['Fichero', 'SQL', 'URL', 'Data toy']
         self.explor_datos = ['Descripción', 'Tabla', 'Tipos de datos','Comportamiento']
-        self.limp_datos = ['Eliminar Nan', 'Reemplazar Nan']
+        self.limp_datos = ['Eliminar Nan', 'Reemplazar Nan', 'Eliminar columnas', 'Eliminar filas',
+                            'Renombrar columnas', 'Reemplazar valores', 'Cambiar indices']
         self.anali_datos = ['Univariante', 'Multivariante', 'Correlación']
-        self.transf_data = ['Agregar', 'Unir', 'Remodelar', 'Pivote', 'Filtrar', 'Particionar', 'PCA', 'ICA']
+        self.transf_data = ['Agregar', 'Unir', 'Remodelar', 'Pivote', 'Filtrar', 'Particionar',
+                            'Normalizar', 'Estandarizar', 'PCA', 'ICA']
         self.expor_datos = ['CSV']
         self.selected_type = self.items_choose[0]
         self.selected_item = 'database'

@@ -57,8 +57,7 @@ class DataBlock(pygame.sprite.Sprite):
         if self.type != 'Exportar':
             self.nodos.add(Nodo((self.rect.x+self.rect.width+self.rect_nodo.width/2, self.rect.y+15)))
 
-    def rect_botones(self):
-        
+    def rect_botones(self):        
         self.botones = []        
         if self.type == 'Ingesta':
             posiciones = [(46, 3)]
