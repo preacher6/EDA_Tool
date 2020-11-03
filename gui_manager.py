@@ -21,30 +21,67 @@ LIGHTGRAY = (192, 192, 192)
 WHITE = (255, 255, 255)
 GRAY = (128, 128, 128)
 BLACK = (0, 0, 0)
+FUENTE = BLACK
 
 
 class ProperWindow(UIWindow):
     def __init__(self, rect, ui_manager):
         super().__init__(rect, ui_manager,
-                         window_display_title='Scale',
-                         object_id='#scaling_window',
+                         window_display_title='Propiedades',
+                         object_id='#proper_window',
                          resizable=True)
 
         loaded_test_image = pygame.image.load('data/images/splat.bmp').convert_alpha()
+        top_margin = 2
         self.test_image = UIImage(pygame.Rect((10, 10), (self.get_container().get_size()[0] - 20,
                                                          self.get_container().get_size()[1] - 20)),
-                                  loaded_test_image, self.ui_manager,
+                                  loaded_test_image, ui_manager,
                                   container=self,
                                   anchors={'top': 'top', 'bottom': 'bottom',
                                            'left': 'left', 'right': 'right'})
 
+        self.entry_text =  UITextEntryLine(pygame.Rect((70, top_margin), (120, 20)),
+                                            manager=ui_manager,
+                                            container=self,
+                                            parent_element=self)
+        
+        self.search_label = pygame_gui.elements.UILabel(pygame.Rect((10, top_margin),
+                                                            (56, self.entry_text.rect.height)),
+                                                                "Nombre:",
+                                                            manager=ui_manager,
+                                                            container=self,
+                                                            parent_element=self)
         self.set_blocking(True)
 
 
+class AlertWindow(UIWindow):
+    def __init__(self, message, rect, ui_manager):
+        super().__init__(rect, ui_manager,
+                         window_display_title='Advertencia',
+                         object_id='#warning_window',
+                         resizable=True)
+        altura = 40
+        message_size = 280
+        self.warn_label = pygame_gui.elements.UILabel(pygame.Rect((0, 12),
+                                                            (self.get_container().get_size()[0], 20)),
+                                                                message,
+                                                                manager=ui_manager,
+                                                                container=self,
+                                                                parent_element=self)
+        #self.set_dimensions((self.warn_label.rect.width, 200))
+        button_size = (100, 30)
+        self.accept_warn = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((self.warn_label.rect.width/2-button_size[0]/2,
+                                                                                 altura+10), button_size),
+                                                                                text='Aceptar',
+                                                                                manager=self.ui_manager,
+                                                                                container=self)
+        self.set_blocking(True)
+
 class GuiManager:
     """Maneja todo lo relacionado a la estructura de la GUI y manejo de eventos"""
-    def __init__(self, workspace_size=(700, 450)):
-        self.manager = pygame_gui.UIManager((1000, 650), PackageResource(package='data.themes', resource='theme_1.json'))
+    def __init__(self, window_size=(1000, 650), workspace_size=(700, 450)):
+        self.window_size = window_size
+        self.manager = pygame_gui.UIManager(window_size, PackageResource(package='data.themes', resource='theme_1.json'))
         self.manager.preload_fonts([{'name': 'fira_code', 'point_size': 10, 'style': 'bold'},
                                             {'name': 'fira_code', 'point_size': 10, 'style': 'regular'},
                                             {'name': 'fira_code', 'point_size': 10, 'style': 'italic'},
@@ -76,6 +113,8 @@ class GuiManager:
         self.init_elements()
 
     def init_elements(self):
+        self.bloque = []
+        self.alert_wi = []
         self.panel_objects  = UIPanel(pygame.Rect(10, 160, 235, 300),
                             starting_layer_height=4,
                             manager=self.manager)
@@ -164,6 +203,8 @@ class GuiManager:
     def check_event(self, event, position, worker, image=None):
         if event.user_type == pygame_gui.UI_BUTTON_PRESSED:
             print(event.ui_object_id)
+            if event.ui_object_id == '#warning_window.button':
+                self.alert_wi.kill()
             for ind_x in range(1, 6):
                 """Recorrer acciones"""
                 if event.ui_object_id == 'panel.#p'+str(ind_x):
@@ -213,8 +254,20 @@ class GuiManager:
                     self.selected_item = 'exportar'
                     self.selected_action = ''
 
+        if event.user_type == pygame_gui.UI_TEXT_ENTRY_FINISHED:
+            if event.text:
+                self.bloque.action = event.text
+            else:
+                size_alert = (300, 150)
+                UIMessageWindow(pygame.Rect((self.window_size[0]/2-size_alert[0]/2, 
+                                             self.window_size[1]/2-size_alert[1]/2), size_alert), html_message='hhola', window_title='fin', manager=self.manager)
+                # self.alert_wi = AlertWindow('El nombre no puede estar vacio', pygame.Rect((self.window_size[0]/2-size_alert[0]/2,
+                #                             self.window_size[1]/2-size_alert[1]/2), size_alert), self.manager)
+
+
         if event.user_type == pygame_gui.UI_SELECTION_LIST_NEW_SELECTION:
             self.selected_action = event.text
+            
 
     def draw_selected(self, screen, position):
         self.datablock.hot_draw(screen, position)
@@ -223,9 +276,10 @@ class GuiManager:
         if self.editar[0]:
             self.hold_line = True
 
-    def check_block(self):
+    def check_block(self, bloque, position, size=(250, 300)):
         """Acá entra si se hace click derecho"""
-        ProperWindow(pygame.Rect((50, 50), (224, 224)), self.manager)
+        self.bloque = bloque
+        ProperWindow(pygame.Rect((position[0]/2-size[0]/2, position[1]/2-size[1]/2), (size[0], size[1])), self.manager)
 
     def draw_wire(self, screen, init_pos, end_line):
         pygame.draw.aaline(screen, BLACK, init_pos, end_line)

@@ -23,13 +23,15 @@ LIGHTGRAY = (192, 192, 192)
 WHITE = (255, 255, 255)
 GRAY = (128, 128, 128)
 BLACK = (0, 0, 0)
+ANCHO = 1000
+ALTO = 650
 
 
 class PGData:
     """
     Clase para trabajar con pygame
     """
-    def __init__(self, window_size=(1000, 650)):
+    def __init__(self, window_size=(ANCHO, ALTO)):
         self.initialize_pygame()
         self.clock = pygame.time.Clock()
         self.font = pygame.font.SysFont('Arial', 40)
@@ -49,7 +51,7 @@ class PGData:
         worker = MainWorker()
         modulo = Modulos(1)
         worker.modulos.add(modulo)
-        gui_manager = GuiManager()
+        gui_manager = GuiManager(window_size=(ANCHO, ALTO))
         position_mouse = (0, 0)  # Inicializar posicion presionad
         init_pos = (0, 0)  # Posicion inicial de la conexion
         draw_wire = False
@@ -103,7 +105,7 @@ class PGData:
                                     for bloque in modulo.data_blocks:
                                         if bloque.rect.collidepoint(position_mouse):
                                             gui_manager.properties = False
-                                            gui_manager.check_block()                                            
+                                            gui_manager.check_block(bloque, (ANCHO, ALTO))                                            
 
                 if event.type == pygame.USEREVENT:                    
                     gui_manager.check_event(event, position_mouse, worker)
@@ -114,7 +116,7 @@ class PGData:
             self.window_surface.fill(BLACK)            
             gui_manager.manager.update(time_delta)
             self.window_surface.blit(self.background, (0, 0))
-            gui_manager.manager.draw_ui(self.window_surface)
+            
             gui_manager.draw_workspace(self.window_surface)
             if draw_wire:
                 gui_manager.draw_wire(self.window_surface, init_pos, abs_position)
@@ -124,9 +126,10 @@ class PGData:
             
             if gui_manager.selected_block:
                 gui_manager.draw_selected(self.window_surface, abs_position)
+            gui_manager.manager.draw_ui(self.window_surface) # Dibujar elementos pygame_gui
             pygame.display.update()
-        
 
+   
 if __name__ == '__main__':
     app = PGData()
     app.run()
