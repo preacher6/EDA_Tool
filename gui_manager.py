@@ -23,6 +23,24 @@ GRAY = (128, 128, 128)
 BLACK = (0, 0, 0)
 
 
+class ProperWindow(UIWindow):
+    def __init__(self, rect, ui_manager):
+        super().__init__(rect, ui_manager,
+                         window_display_title='Scale',
+                         object_id='#scaling_window',
+                         resizable=True)
+
+        loaded_test_image = pygame.image.load('data/images/splat.bmp').convert_alpha()
+        self.test_image = UIImage(pygame.Rect((10, 10), (self.get_container().get_size()[0] - 20,
+                                                         self.get_container().get_size()[1] - 20)),
+                                  loaded_test_image, self.ui_manager,
+                                  container=self,
+                                  anchors={'top': 'top', 'bottom': 'bottom',
+                                           'left': 'left', 'right': 'right'})
+
+        self.set_blocking(True)
+
+
 class GuiManager:
     """Maneja todo lo relacionado a la estructura de la GUI y manejo de eventos"""
     def __init__(self, workspace_size=(700, 450)):
@@ -48,7 +66,7 @@ class GuiManager:
         self.selected_action = ''
         self.items_list = [self.items_choose[0], self.ing_datos[0]]
         self.proc_datos = ['Explorar datos', 'Limpiar datos', 'Transformar datos']
-        
+        self.properties = False
         self.validar = []
 
         self.selected_block = False  # Indica si se esta dibujando algun bloque en pantalla
@@ -207,7 +225,7 @@ class GuiManager:
 
     def check_block(self):
         """Acá entra si se hace click derecho"""
-        pass
+        ProperWindow(pygame.Rect((50, 50), (224, 224)), self.manager)
 
     def draw_wire(self, screen, init_pos, end_line):
         pygame.draw.aaline(screen, BLACK, init_pos, end_line)

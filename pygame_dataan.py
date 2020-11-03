@@ -15,7 +15,7 @@ from pygame_gui.elements import UIPanel
 from pygame_gui.elements import UISelectionList
 from pygame_gui.windows import UIMessageWindow
 from entidades import DataBlock, Modulos, MainWorker, Conexion
-from gui_manager import GuiManager
+from gui_manager import GuiManager, ProperWindow
 from pygame.locals import *
 
 
@@ -102,7 +102,8 @@ class PGData:
                                 if modulo.id == 1:
                                     for bloque in modulo.data_blocks:
                                         if bloque.rect.collidepoint(position_mouse):
-                                            print(bloque)
+                                            gui_manager.properties = False
+                                            gui_manager.check_block()                                            
 
                 if event.type == pygame.USEREVENT:                    
                     gui_manager.check_event(event, position_mouse, worker)
