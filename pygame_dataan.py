@@ -65,34 +65,45 @@ class PGData:
                     gui_manager.cancel()
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     position_mouse = pygame.mouse.get_pos()
-                    if gui_manager.selected_block:
-                        for modulo in worker.modulos:
-                            if modulo.id == 1:
-                                datablock = DataBlock(position_mouse, gui_manager.selected_item,
-                                type=gui_manager.selected_type)
-                                modulo.data_blocks.add(datablock)
-                                gui_manager.selected_block = False
-                    if draw_wire:
-                        for modulo in worker.modulos:
-                            if modulo.id == 1:
-                                for bloque in modulo.data_blocks:
-                                    for nodo in bloque.nodos:
-                                        if nodo.rect.collidepoint(position_mouse):
-                                            elem_fin = bloque
-                                            conexion = Conexion((init_pos, position_mouse),
-                                            elem_ini, elem_fin)
-                                            modulo.conections.add(conexion)
-                                            draw_wire = False
+                    if pygame.mouse.get_pressed()[0]:
+                        """Tareas dependientes del click izquierdo"""
+                        if gui_manager.selected_block:
+                            for modulo in worker.modulos:
+                                if modulo.id == 1:
+                                    datablock = DataBlock(position_mouse, gui_manager.selected_item,
+                                    type=gui_manager.selected_type, action=gui_manager.selected_action)
+                                    modulo.data_blocks.add(datablock)
+                                    gui_manager.selected_block = False
+                        if draw_wire:
+                            for modulo in worker.modulos:
+                                if modulo.id == 1:
+                                    for bloque in modulo.data_blocks:
+                                        for nodo in bloque.nodos:
+                                            if nodo.rect.collidepoint(position_mouse):
+                                                elem_fin = bloque
+                                                conexion = Conexion((init_pos, position_mouse),
+                                                elem_ini, elem_fin)
+                                                modulo.conections.add(conexion)
+                                                draw_wire = False
+                                                gui_manager.hold_line = False
 
-                    if gui_manager.hold_line and not draw_wire:
+                        if gui_manager.hold_line and not draw_wire:
+                            for modulo in worker.modulos:
+                                if modulo.id == 1:
+                                    for bloque in modulo.data_blocks:
+                                        for nodo in bloque.nodos:
+                                            if nodo.rect.collidepoint(position_mouse):
+                                                draw_wire = True
+                                                init_pos = pygame.mouse.get_pos()
+                                                elem_ini = bloque
+                    elif pygame.mouse.get_pressed()[2]:
+                        """Tareas dependientes del click derecho"""
                         for modulo in worker.modulos:
-                            if modulo.id == 1:
-                                for bloque in modulo.data_blocks:
-                                    for nodo in bloque.nodos:
-                                        if nodo.rect.collidepoint(position_mouse):
-                                            draw_wire = True
-                                            init_pos = pygame.mouse.get_pos()
-                                            elem_ini = bloque
+                                if modulo.id == 1:
+                                    for bloque in modulo.data_blocks:
+                                        if bloque.rect.collidepoint(position_mouse):
+                                            print(bloque)
+
                 if event.type == pygame.USEREVENT:                    
                     gui_manager.check_event(event, position_mouse, worker)
                     gui_manager.check_actions(position_mouse)

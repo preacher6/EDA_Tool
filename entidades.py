@@ -19,17 +19,19 @@ LIGHTGRAY = (192, 192, 192)
 WHITE = (255, 255, 255)
 GRAY = (128, 128, 128)
 BLACK = (0, 0, 0)
+FUENTE = BLACK
 
 
 class DataBlock(pygame.sprite.Sprite):
     """Maneja cada bloque"""
-    def __init__(self, position, name, id='', status=False, type=None):
+    def __init__(self, position, name, id='', status=False, type=None, action=None):
         pygame.sprite.Sprite.__init__(self)
         self.position = position
         self.name = name  # Indica el nombre del icono
         self.id = id
         self.status = status
         self.type = type
+        self.action = action
         self.dir_images = {'database': 'pics/icons/database.png',
                             'describir': 'pics/icons/describir.png',
                             'limpiar': 'pics/icons/limpiar.png',
@@ -48,6 +50,7 @@ class DataBlock(pygame.sprite.Sprite):
         self.image_nodo = pygame.image.load(os.path.join('pics', 'images', 'nodo.png'))
         self.rect_nodo = self.image_nodo.get_rect()
         self.nodos = pygame.sprite.Group()
+        self.font = pygame.font.SysFont('Arial', 15)
         self.rect_image()
         self.definir_nodos()   
 
@@ -101,7 +104,9 @@ class DataBlock(pygame.sprite.Sprite):
         
         #self.image.blit(self.quitar, (5, 17))
         self.image.blit(self.image_status, (27, 10))
-        self.image.blit(self.icon, (18, 53))        
+        self.image.blit(self.icon, (18, 53))
+        screen.blit(self.font.render(self.action, True, FUENTE),
+                                    (self.position[0]-self.rect.size[0]/2, self.position[1]+self.rect.size[1]/2))   
         screen.blit(self.image, self.rect)
         for nodo in self.nodos:
             nodo.draw(screen)
@@ -166,13 +171,13 @@ class MainWorker(pygame.sprite.Sprite):
 
     def draw_all(self, screen, position):
         for modulo in self.modulos:
+            for conexion in modulo.conections:
+                conexion.draw(screen)
             for data in modulo.data_blocks:
                 data.draw(screen)
                 for boton in data.botones:
                     if boton[1].collidepoint(position):
-                        print('in')
-            for conexion in modulo.conections:
-                conexion.draw(screen)
+                        print('in')            
 
     def add_nodo(self, screen, position, modulo):
         for bloque in modulo.data_blocks:

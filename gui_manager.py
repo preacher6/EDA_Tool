@@ -45,6 +45,7 @@ class GuiManager:
         self.expor_datos = ['CSV']
         self.selected_type = self.items_choose[0]
         self.selected_item = 'database'
+        self.selected_action = ''
         self.items_list = [self.items_choose[0], self.ing_datos[0]]
         self.proc_datos = ['Explorar datos', 'Limpiar datos', 'Transformar datos']
         
@@ -157,38 +158,45 @@ class GuiManager:
                     self.cancel()
                     self.editar[ind_x-1] = 1
 
-            if event.ui_element == self.select:  # Selecciona un objeto
+            if event.ui_element == self.select and self.selected_action:  # Selecciona un objeto
                 self.selected_block = True
-                self.datablock = DataBlock(position, self.selected_item)
-                """for modulo in worker.modulos:
-                    if modulo.id == 1:
-                        modulo.data_ingesta.add(self.datablock)"""
+                self.datablock = DataBlock(position, self.selected_item, type=self.selected_action)
+
         if event.user_type == pygame_gui.UI_DROP_DOWN_MENU_CHANGED:
             if event.ui_element == self.primer_menu:  # Elección primera acción                
                 if event.text == self.items_choose[0]:
                     self.selected_type = self.items_choose[0]
                     self.reasign1(self.ing_datos)
                     self.selected_item = 'database'
+                    self.selected_action = ''
                 elif event.text == self.items_choose[1]:
                     self.selected_type = self.items_choose[1]
                     self.reasign1(self.explor_datos)
                     self.selected_item = 'describir'
+                    self.selected_action = ''
                 elif event.text == self.items_choose[2]:
                     self.selected_type = self.items_choose[2]
                     self.reasign1(self.limp_datos)
                     self.selected_item = 'limpiar'
+                    self.selected_action = ''
                 elif event.text == self.items_choose[3]:
                     self.selected_type = self.items_choose[3]
                     self.reasign1(self.anali_datos)
                     self.selected_item = 'analizar'
+                    self.selected_action = ''
                 elif event.text == self.items_choose[4]:
                     self.selected_type = self.items_choose[4]
                     self.reasign1(self.transf_data)
                     self.selected_item = 'transformar'
+                    self.selected_action = ''
                 elif event.text == self.items_choose[5]:
                     self.selected_type = self.items_choose[5]
                     self.reasign1(self.expor_datos)
                     self.selected_item = 'exportar'
+                    self.selected_action = ''
+
+        if event.user_type == pygame_gui.UI_SELECTION_LIST_NEW_SELECTION:
+            self.selected_action = event.text
 
     def draw_selected(self, screen, position):
         self.datablock.hot_draw(screen, position)
@@ -196,6 +204,10 @@ class GuiManager:
     def check_actions(self, position):
         if self.editar[0]:
             self.hold_line = True
+
+    def check_block(self):
+        """Acá entra si se hace click derecho"""
+        pass
 
     def draw_wire(self, screen, init_pos, end_line):
         pygame.draw.aaline(screen, BLACK, init_pos, end_line)
