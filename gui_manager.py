@@ -275,7 +275,13 @@ class GuiManager:
                             lista_iniciales.append(bloque)   
                     modulo.dict_rutas['nivel1'] = lista_iniciales
                     modulo.build_rutas(lista_iniciales)     
-                print(modulo.dict_rutas)               
+                print(modulo.dict_rutas)  
+                for ruta, mod in modulo.dict_rutas.items():
+                    if mod:
+                        for bloque in mod:
+                            print(ruta, bloque.accion)    
+                            print(ruta, bloque.type)   
+                            print('--')       
             self.tareas[0] = 0    
 
     def check_block(self, bloque, position, size=(450, 300)):
