@@ -33,6 +33,8 @@ class DataBlock(pygame.sprite.Sprite):
         self.id = id
         self.status = status
         self.type = type
+        self.in_elements = pygame.sprite.Group()  # elementos que ingresan en él
+        self.out_elements = pygame.sprite.Group()  # elementos que salen de él. Permite identificar ultimos elementos
         self.bloque = self.clase_bloque()
         self.action = action
         self.dir_images = {'database': 'pics/icons/database.png',
@@ -53,6 +55,7 @@ class DataBlock(pygame.sprite.Sprite):
         self.image_nodo = pygame.image.load(os.path.join('pics', 'images', 'nodo.png'))
         self.rect_nodo = self.image_nodo.get_rect()
         self.nodos = pygame.sprite.Group()
+        self.nodos_v = pygame.sprite.Group()
         self.font = pygame.font.SysFont('Arial', 15)
         self.rect_image()
         self.definir_nodos()   
@@ -62,10 +65,14 @@ class DataBlock(pygame.sprite.Sprite):
             return blocks.Ingesta()
         
     def definir_nodos(self):
-        if self.type != 'Ingesta':
+        if self.type not in ['Ingesta', 'Exploración', 'Análisis']:
             self.nodos.add(Nodo((self.rect.x-self.rect_nodo.width/2, self.rect.y+15)))
-        if self.type != 'Exportar':
+        if self.type not in ['Exportar', 'Exploración', 'Análisis']:
             self.nodos.add(Nodo((self.rect.x+self.rect.width+self.rect_nodo.width/2, self.rect.y+15)))
+        if self.type in ['Exploración', 'Análisis']:
+            self.nodos_v.add(NodoV((self.rect.x-self.rect_nodo.width/2, self.rect.y+15)))
+        if self.type in ['Ingesta', 'Transformación', 'Limpieza']:           
+            self.nodos_v.add(NodoV((self.rect.x+self.rect.width+self.rect_nodo.width/2, self.rect.y+35)))
 
     def rect_botones(self):        
         self.botones = []        
@@ -110,7 +117,6 @@ class DataBlock(pygame.sprite.Sprite):
         else:
             self.image_status = pygame.image.load(os.path.join(self.path_status['off']))
         self.rect_image()
-        self.rect_botones()
         
         #self.image.blit(self.quitar, (5, 17))
         self.image.blit(self.image_status, (27, 10))
@@ -120,6 +126,8 @@ class DataBlock(pygame.sprite.Sprite):
         screen.blit(self.image, self.rect)
         for nodo in self.nodos:
             nodo.draw(screen)
+        for nodov in self.nodos_v:
+            nodov.draw(screen)
 
     def hot_draw(self, screen, position):
         """Dibujar el bloque en caliente"""
@@ -139,6 +147,17 @@ class Nodo(pygame.sprite.Sprite):
     def __init__(self, position):
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.image.load(os.path.join('pics', 'images', 'nodo_off.png'))
+        self.rect = self.image.get_rect()
+        self.rect.center = position
+
+    def draw(self, screen):
+        screen.blit(self.image, self.rect)
+        
+class NodoV(pygame.sprite.Sprite):
+    """Maneja cada modulo que se crea como una entidad independiente"""
+    def __init__(self, position):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.image.load(os.path.join('pics', 'images', 'nodo_v.png'))
         self.rect = self.image.get_rect()
         self.rect.center = position
 
@@ -171,8 +190,23 @@ class Modulos(pygame.sprite.Sprite):
         self.data_blocks = pygame.sprite.Group()
         self.conections = pygame.sprite.Group()  # Guarda las conexiones del contenedor
         self.id = identidad
+        self.dict_rutas = {}
 
-
+    def build_rutas(self, lista_iniciales):
+        self.dict_rutas['nivel1']
+        iter=2
+        lista_elementos = lista_iniciales        
+        while iter<10:  # Cantidad de elementos en una ruta     
+            lista_nueva = []       
+            for element in lista_elementos:
+                for block in self.data_blocks:
+                    if element == block:
+                        for out_element in element.out_elements:
+                            print(out_element.name)
+                            lista_nueva.append(out_element)
+            self.dict_rutas['nivel'+str(iter)] = lista_nueva
+            lista_elementos = lista_nueva.copy()
+            iter+=1
 class MainWorker(pygame.sprite.Sprite):
     """Maneja todo lo relacionado al accionar de los objetos"""
     def __init__(self):

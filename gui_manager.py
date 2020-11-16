@@ -177,8 +177,6 @@ class GuiManager:
     
     def check_event(self, event, position, worker, image=None):
         if event.user_type == pygame_gui.UI_BUTTON_PRESSED:
-            print(event.ui_object_id)
-            print(event.ui_element)
             if event.ui_object_id == '#warning_window.button':
                 self.alert_wi.kill()
             if event.ui_object_id == '#proper_load.#folder':
@@ -262,9 +260,20 @@ class GuiManager:
     def draw_selected(self, screen, position):
         self.datablock.hot_draw(screen, position)
 
-    def check_actions(self, position):
+    def check_actions(self, position, worker):
         if self.editar[0]:
-            self.hold_line = True
+            self.hold_line = True            
+        if self.tareas[0]:
+            lista_iniciales = []
+            for modulo in worker.modulos:
+                if modulo.id == 1:
+                    for bloque in modulo.data_blocks:
+                        if not bloque.in_elements:
+                            lista_iniciales.append(bloque)   
+                    modulo.dict_rutas['nivel1'] = lista_iniciales
+                    modulo.build_rutas(lista_iniciales)     
+                print(modulo.dict_rutas)               
+            self.tareas[0] = 0    
 
     def check_block(self, bloque, position, size=(450, 300)):
         """Acá entra si se hace click derecho"""
@@ -273,10 +282,18 @@ class GuiManager:
 
     def draw_wire(self, screen, init_pos, end_line):
         pygame.draw.aaline(screen, BLACK, init_pos, end_line)
-
+        
+    def run_pipeline(self):
+        self.routes()
+        
     def cancel(self):
         self.selected_block = False
         self.tareas = [0]*5
 
+    def routes(self):
+        """Definir rutas para los diferentes pipelines que se formen
+        """
+        pass
+    
     def load_rects(self):
         pass

@@ -84,7 +84,6 @@ class PGData:
                         if gui_manager.selected_block:  # Poner bloque en modulo
                             for modulo in worker.modulos:
                                 if modulo.id == 1:
-                                    print('o', gui_manager.selected_type)
                                     datablock = DataBlock(position_mouse, gui_manager.selected_item,
                                     type=gui_manager.selected_type, action=gui_manager.selected_action)
                                     modulo.data_blocks.add(datablock)
@@ -96,6 +95,10 @@ class PGData:
                                     for bloque in modulo.data_blocks:
                                         for nodo in bloque.nodos:
                                             if nodo.rect.collidepoint(position_mouse):
+                                                bloque.in_elements.add(elem_ini)
+                                                for bloque_ini in modulo.data_blocks:
+                                                    if bloque_ini == elem_ini:
+                                                        bloque_ini.out_elements.add(bloque)
                                                 elem_fin = bloque
                                                 conexion = Conexion((init_pos, position_mouse),
                                                 elem_ini, elem_fin)
@@ -123,7 +126,7 @@ class PGData:
 
                 if event.type == pygame.USEREVENT:                    
                     gui_manager.check_event(event, position_mouse, worker)
-                    gui_manager.check_actions(position_mouse)
+                    gui_manager.check_actions(position_mouse, worker)
                 gui_manager.manager.process_events(event)
             abs_position = pygame.mouse.get_pos()  # Posición actual mouse
             
