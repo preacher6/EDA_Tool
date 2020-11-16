@@ -207,6 +207,8 @@ class Modulos(pygame.sprite.Sprite):
             self.dict_rutas['nivel'+str(iter)] = lista_nueva
             lista_elementos = lista_nueva.copy()
             iter+=1
+            
+
 class MainWorker(pygame.sprite.Sprite):
     """Maneja todo lo relacionado al accionar de los objetos"""
     def __init__(self):

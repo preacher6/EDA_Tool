@@ -206,6 +206,8 @@ class GuiManager:
             print(self.path)
             print(event.ui_element)
             print(self.panel_proper.path_label.set_text(self.path))
+            self.bloque.bloque.path = self.path
+                #modulo.action_block(path=self.path)
             #event.ui_object_id.set_text('hola')
             
 
@@ -269,6 +271,7 @@ class GuiManager:
                 if modulo.id == 1:
                     for bloque in modulo.data_blocks:
                         if not bloque.in_elements:
+                            bloque.bloque.cargar_datos()
                             lista_iniciales.append(bloque)   
                     modulo.dict_rutas['nivel1'] = lista_iniciales
                     modulo.build_rutas(lista_iniciales)     

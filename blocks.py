@@ -10,7 +10,12 @@ class OwnPipeline():
 class Ingesta:
     def __init__(self) -> None:
         self.data = ''
+        self.path = ''
     
-    def cargar_datos(self, archivo):
-        self.data = pd.read_csv(archivo)
+    def define_data(self, path):
+        self.path = path
+        
+    def cargar_datos(self):
+        self.data = pd.read_csv(self.path)
+        print(self.data.head())
     
