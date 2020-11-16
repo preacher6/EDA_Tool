@@ -13,8 +13,11 @@ from pygame_gui.elements import UILabel
 from pygame_gui.elements import UIImage
 from pygame_gui.elements import UIPanel
 from pygame_gui.elements import UISelectionList
+from pygame_gui.windows import UIFileDialog
 from pygame_gui.windows import UIMessageWindow
 from entidades import DataBlock, Modulos, MainWorker
+import propiedades
+from pygame_gui.core.utility import create_resource_path
 
 
 LIGHTGRAY = (192, 192, 192)
@@ -22,36 +25,6 @@ WHITE = (255, 255, 255)
 GRAY = (128, 128, 128)
 BLACK = (0, 0, 0)
 FUENTE = BLACK
-
-
-class ProperWindow(UIWindow):
-    def __init__(self, rect, ui_manager):
-        super().__init__(rect, ui_manager,
-                         window_display_title='Propiedades',
-                         object_id='#proper_window',
-                         resizable=True)
-
-        loaded_test_image = pygame.image.load('data/images/splat.bmp').convert_alpha()
-        top_margin = 2
-        self.test_image = UIImage(pygame.Rect((10, 10), (self.get_container().get_size()[0] - 20,
-                                                         self.get_container().get_size()[1] - 20)),
-                                  loaded_test_image, ui_manager,
-                                  container=self,
-                                  anchors={'top': 'top', 'bottom': 'bottom',
-                                           'left': 'left', 'right': 'right'})
-
-        self.entry_text =  UITextEntryLine(pygame.Rect((70, top_margin), (120, 20)),
-                                            manager=ui_manager,
-                                            container=self,
-                                            parent_element=self)
-        
-        self.search_label = pygame_gui.elements.UILabel(pygame.Rect((10, top_margin),
-                                                            (56, self.entry_text.rect.height)),
-                                                                "Nombre:",
-                                                            manager=ui_manager,
-                                                            container=self,
-                                                            parent_element=self)
-        self.set_blocking(True)
 
 
 class AlertWindow(UIWindow):
@@ -62,15 +35,15 @@ class AlertWindow(UIWindow):
                          resizable=True)
         altura = 40
         message_size = 280
-        self.warn_label = pygame_gui.elements.UILabel(pygame.Rect((0, 12),
-                                                            (self.get_container().get_size()[0], 20)),
-                                                                message,
-                                                                manager=ui_manager,
-                                                                container=self,
-                                                                parent_element=self)
+        self.warn_label = UILabel(pygame.Rect((0, 12),
+                                            (self.get_container().get_size()[0], 20)),
+                                                message,
+                                                manager=ui_manager,
+                                                container=self,
+                                                parent_element=self)
         #self.set_dimensions((self.warn_label.rect.width, 200))
         button_size = (100, 30)
-        self.accept_warn = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((self.warn_label.rect.width/2-button_size[0]/2,
+        self.accept_warn = UIButton(relative_rect=pygame.Rect((self.warn_label.rect.width/2-button_size[0]/2,
                                                                                  altura+10), button_size),
                                                                                 text='Aceptar',
                                                                                 manager=self.ui_manager,
@@ -90,13 +63,13 @@ class GuiManager:
                                             ])
         self.SIZE_WORKSPACE = workspace_size  # Tamaño del espacio de trabajo        
         self.items_choose = ['Ingesta', 'Exploración', 'Limpieza', 'Análisis', 'Transformación', 'Exportar']        
-        self.ing_datos = ['Fichero', 'SQL', 'URL', 'Data toy']
+        self.ing_datos = ['Fichero', 'SQL', 'URL', 'Data toy', 'Carpeta']
         self.explor_datos = ['Descripción', 'Tabla', 'Tipos de datos','Comportamiento']
         self.limp_datos = ['Eliminar Nan', 'Reemplazar Nan', 'Eliminar columnas', 'Eliminar filas',
                             'Renombrar columnas', 'Reemplazar valores', 'Cambiar indices']
         self.anali_datos = ['Univariante', 'Multivariante', 'Correlación']
         self.transf_data = ['Agregar', 'Unir', 'Remodelar', 'Pivote', 'Filtrar', 'Particionar',
-                            'Normalizar', 'Estandarizar', 'PCA', 'ICA']
+                            'Normalizar', 'Estandarizar', 'PCA', 'ICA', 'Muestra']
         self.expor_datos = ['CSV']
         self.selected_type = self.items_choose[0]
         self.selected_item = 'database'
@@ -110,6 +83,8 @@ class GuiManager:
         self.tareas = [0]*5
         self.editar = [0]*4
         self.hold_line = False  # Dibujar arco para conectar elementos
+        self.path = ''  # Direccion de archivo a procesar
+        self.panel_proper = None  # Panel de propiedades del bloque elegido
         self.init_elements()
 
     def init_elements(self):
@@ -203,8 +178,15 @@ class GuiManager:
     def check_event(self, event, position, worker, image=None):
         if event.user_type == pygame_gui.UI_BUTTON_PRESSED:
             print(event.ui_object_id)
+            print(event.ui_element)
             if event.ui_object_id == '#warning_window.button':
                 self.alert_wi.kill()
+            if event.ui_object_id == '#proper_load.#folder':
+                self.file_dialog = UIFileDialog(pygame.Rect(160, 50, 440, 500),
+                                                    self.manager,
+                                                    window_title='Cargar datos...',
+                                                    initial_file_path='data/',
+                                                    allow_existing_files_only=True)
             for ind_x in range(1, 6):
                 """Recorrer acciones"""
                 if event.ui_object_id == 'panel.#p'+str(ind_x):
@@ -220,6 +202,14 @@ class GuiManager:
             if event.ui_element == self.select and self.selected_action:  # Selecciona un objeto
                 self.selected_block = True
                 self.datablock = DataBlock(position, self.selected_item, type=self.selected_action)
+        
+        if event.user_type == pygame_gui.UI_FILE_DIALOG_PATH_PICKED:
+            self.path = create_resource_path(event.text)
+            print(self.path)
+            print(event.ui_element)
+            print(self.panel_proper.path_label.set_text(self.path))
+            #event.ui_object_id.set_text('hola')
+            
 
         if event.user_type == pygame_gui.UI_DROP_DOWN_MENU_CHANGED:
             if event.ui_element == self.primer_menu:  # Elección primera acción                
@@ -276,10 +266,10 @@ class GuiManager:
         if self.editar[0]:
             self.hold_line = True
 
-    def check_block(self, bloque, position, size=(250, 300)):
+    def check_block(self, bloque, position, size=(450, 300)):
         """Acá entra si se hace click derecho"""
         self.bloque = bloque
-        ProperWindow(pygame.Rect((position[0]/2-size[0]/2, position[1]/2-size[1]/2), (size[0], size[1])), self.manager)
+        self.panel_proper = propiedades.ProperLoad(pygame.Rect((position[0]/2-size[0]/2, position[1]/2-size[1]/2), (size[0], size[1])), self.manager)
 
     def draw_wire(self, screen, init_pos, end_line):
         pygame.draw.aaline(screen, BLACK, init_pos, end_line)

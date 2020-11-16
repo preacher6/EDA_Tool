@@ -15,7 +15,7 @@ from pygame_gui.elements import UIPanel
 from pygame_gui.elements import UISelectionList
 from pygame_gui.windows import UIMessageWindow
 from entidades import DataBlock, Modulos, MainWorker, Conexion
-from gui_manager import GuiManager, ProperWindow
+from gui_manager import GuiManager
 from pygame.locals import *
 
 
@@ -64,18 +64,32 @@ class PGData:
                 if event.type == pygame.QUIT:
                     self.is_running = False
                 elif keys[K_ESCAPE]:  # Acciones al presionar tecla escape
-                    gui_manager.cancel()
+                    gui_manager.cancel()                    
+                    for modulo in worker.modulos:
+                        if modulo.id == 1:
+                            for bloque in modulo.data_blocks:
+                                bloque.selected = False
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     position_mouse = pygame.mouse.get_pos()
                     if pygame.mouse.get_pressed()[0]:
                         """Tareas dependientes del click izquierdo"""
-                        if gui_manager.selected_block:
+                        for modulo in worker.modulos:
+                                if modulo.id == 1:
+                                    for bloque in modulo.data_blocks:
+                                        if bloque.rect.collidepoint(position_mouse):
+                                            if not bloque.selected: 
+                                                bloque.selected = True
+                                            else:
+                                                bloque.selected = False
+                        if gui_manager.selected_block:  # Poner bloque en modulo
                             for modulo in worker.modulos:
                                 if modulo.id == 1:
+                                    print('o', gui_manager.selected_type)
                                     datablock = DataBlock(position_mouse, gui_manager.selected_item,
                                     type=gui_manager.selected_type, action=gui_manager.selected_action)
                                     modulo.data_blocks.add(datablock)
                                     gui_manager.selected_block = False
+                        
                         if draw_wire:
                             for modulo in worker.modulos:
                                 if modulo.id == 1:

@@ -14,6 +14,8 @@ from pygame_gui.elements import UIImage
 from pygame_gui.elements import UIPanel
 from pygame_gui.elements import UISelectionList
 from pygame_gui.windows import UIMessageWindow
+import blocks
+
 
 LIGHTGRAY = (192, 192, 192)
 WHITE = (255, 255, 255)
@@ -31,6 +33,7 @@ class DataBlock(pygame.sprite.Sprite):
         self.id = id
         self.status = status
         self.type = type
+        self.bloque = self.clase_bloque()
         self.action = action
         self.dir_images = {'database': 'pics/icons/database.png',
                             'describir': 'pics/icons/describir.png',
@@ -53,7 +56,11 @@ class DataBlock(pygame.sprite.Sprite):
         self.font = pygame.font.SysFont('Arial', 15)
         self.rect_image()
         self.definir_nodos()   
-
+        
+    def clase_bloque(self):
+        if self.type == 'Ingesta':
+            return blocks.Ingesta()
+        
     def definir_nodos(self):
         if self.type != 'Ingesta':
             self.nodos.add(Nodo((self.rect.x-self.rect_nodo.width/2, self.rect.y+15)))
@@ -94,7 +101,10 @@ class DataBlock(pygame.sprite.Sprite):
         self.rect.center = self.position
 
     def draw(self, screen):        
-        self.image = pygame.image.load(os.path.join('pics', 'images', 'block.png'))
+        if not self.selected:
+            self.image = pygame.image.load(os.path.join('pics', 'images', 'block.png'))
+        else:
+            self.image = pygame.image.load(os.path.join('pics', 'images', 'block_s.png'))
         if self.status:
             self.image_status = pygame.image.load(os.path.join(self.path_status['on']))
         else:

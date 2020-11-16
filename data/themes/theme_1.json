@@ -170,5 +170,14 @@
         {
             "shape": "ellipse"
         }
+    },
+    "#folder":
+    {
+        "images":
+        {
+            "normal_image": {
+                "path": "pics/icons/folder.png"
+            }
+        }
     }
 }
