@@ -58,8 +58,7 @@ class PGData:
         elem_ini = None
         while self.is_running:
             keys = pygame.key.get_pressed()  # Obtencion de tecla presionada
-            time_delta = self.clock.tick(60)/1000.0
-            
+            time_delta = self.clock.tick(60)/1000.0            
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.is_running = False
@@ -128,18 +127,15 @@ class PGData:
                     gui_manager.check_event(event, position_mouse, worker)
                     gui_manager.check_actions(position_mouse, worker)
                 gui_manager.manager.process_events(event)
-            abs_position = pygame.mouse.get_pos()  # Posición actual mouse
-            
+            abs_position = pygame.mouse.get_pos()  # Posición actual mouse            
             self.window_surface.fill(BLACK)            
             gui_manager.manager.update(time_delta)
-            self.window_surface.blit(self.background, (0, 0))
-            
+            self.window_surface.blit(self.background, (0, 0))            
             gui_manager.draw_workspace(self.window_surface)
             if draw_wire:
                 gui_manager.draw_wire(self.window_surface, init_pos, abs_position)
             gui_manager.workspace.fill(LIGHTGRAY)
-            worker.draw_all(self.window_surface, abs_position)
-            
+            worker.draw_all(self.window_surface, abs_position)   
             
             if gui_manager.selected_block:
                 gui_manager.draw_selected(self.window_surface, abs_position)

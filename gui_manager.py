@@ -254,7 +254,6 @@ class GuiManager:
                 # self.alert_wi = AlertWindow('El nombre no puede estar vacio', pygame.Rect((self.window_size[0]/2-size_alert[0]/2,
                 #                             self.window_size[1]/2-size_alert[1]/2), size_alert), self.manager)
 
-
         if event.user_type == pygame_gui.UI_SELECTION_LIST_NEW_SELECTION:
             self.selected_action = event.text
             
@@ -271,7 +270,6 @@ class GuiManager:
                 if modulo.id == 1:
                     for bloque in modulo.data_blocks:
                         if not bloque.in_elements:
-                            bloque.bloque.cargar_datos()
                             lista_iniciales.append(bloque)   
                     modulo.dict_rutas['nivel1'] = lista_iniciales
                     modulo.build_rutas(lista_iniciales)     
@@ -279,16 +277,20 @@ class GuiManager:
                 for ruta, mod in modulo.dict_rutas.items():
                     if mod:
                         for bloque in mod:
-                            print(ruta, bloque.accion)    
-                            print(ruta, bloque.type)   
+                            #print(bloque.bloque.procesar())
+                            #print(ruta, bloque.action)    
+                            #print(ruta, bloque.type)   
                             print('--')       
             self.tareas[0] = 0    
 
     def check_block(self, bloque, position, size=(450, 300)):
         """Acá entra si se hace click derecho"""
         self.bloque = bloque
-        self.panel_proper = propiedades.ProperLoad(pygame.Rect((position[0]/2-size[0]/2, position[1]/2-size[1]/2), (size[0], size[1])), self.manager)
-
+        if bloque.action=='Fichero':
+            self.panel_proper = propiedades.ProperLoad(pygame.Rect((position[0]/2-size[0]/2, position[1]/2-size[1]/2), (size[0], size[1])), self.manager)
+        if bloque.action=='Eliminar columnas':
+            self.panel_proper = propiedades.ProperDelCol(pygame.Rect((position[0]/2-size[0]/2, position[1]/2-size[1]/2), (size[0], size[1])), self.manager)            
+        
     def draw_wire(self, screen, init_pos, end_line):
         pygame.draw.aaline(screen, BLACK, init_pos, end_line)
         

@@ -35,8 +35,8 @@ class DataBlock(pygame.sprite.Sprite):
         self.type = type
         self.in_elements = pygame.sprite.Group()  # elementos que ingresan en él
         self.out_elements = pygame.sprite.Group()  # elementos que salen de él. Permite identificar ultimos elementos
-        self.bloque = self.clase_bloque()
         self.action = action
+        self.bloque = self.clase_bloque()        
         self.dir_images = {'database': 'pics/icons/database.png',
                             'describir': 'pics/icons/describir.png',
                             'limpiar': 'pics/icons/limpiar.png',
@@ -62,7 +62,9 @@ class DataBlock(pygame.sprite.Sprite):
         
     def clase_bloque(self):
         if self.type == 'Ingesta':
-            return blocks.Ingesta()
+            return blocks.Ingesta(self.action)
+        if self.type == 'Limpieza':
+            return blocks.Limpieza(self.action)
         
     def definir_nodos(self):
         if self.type not in ['Ingesta', 'Exploración', 'Análisis']:
@@ -190,7 +192,8 @@ class Modulos(pygame.sprite.Sprite):
         self.data_blocks = pygame.sprite.Group()
         self.conections = pygame.sprite.Group()  # Guarda las conexiones del contenedor
         self.id = identidad
-        self.dict_rutas = {}
+        self.dict_rutas = {}  # Contiene los niveles
+        self.dict_elementos = {}  # Contiene la salida de cada elemento
 
     def build_rutas(self, lista_iniciales):
         self.dict_rutas['nivel1']
@@ -203,10 +206,23 @@ class Modulos(pygame.sprite.Sprite):
                     if element == block:
                         for out_element in element.out_elements:
                             print(out_element.name)
-                            lista_nueva.append(out_element)
+                            if out_element not in lista_nueva:
+                                lista_nueva.append(out_element)
             self.dict_rutas['nivel'+str(iter)] = lista_nueva
             lista_elementos = lista_nueva.copy()
             iter+=1
+        
+        for nivel, elementos in self.dict_rutas.items():
+            for elemento in elementos:
+                if elemento not in self.dict_elementos.keys():
+                    if nivel == 'nivel1':
+                        elemento.bloque.procesar()
+                        self.dict_elementos[elemento.action] = elemento.bloque.data
+                    else:
+                        data_in = [block.bloque.data for block in elemento.in_elements]
+                        elemento.bloque.procesar(data=data_in)
+                        self.dict_elementos[elemento.action] = elemento.bloque.data
+        print('dictx,', self.dict_elementos)
             
 
 class MainWorker(pygame.sprite.Sprite):
