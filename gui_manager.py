@@ -64,7 +64,7 @@ class GuiManager:
         self.SIZE_WORKSPACE = workspace_size  # Tamaño del espacio de trabajo        
         self.items_choose = ['Ingesta', 'Exploración', 'Limpieza', 'Análisis', 'Transformación', 'Exportar']        
         self.ing_datos = ['Fichero', 'SQL', 'URL', 'Data toy', 'Carpeta']
-        self.explor_datos = ['Descripción', 'Tabla', 'Tipos de datos','Comportamiento']
+        self.explor_datos = ['Tabla', 'Descripción', 'Tipos de datos','Comportamiento']
         self.limp_datos = ['Eliminar Nan', 'Reemplazar Nan', 'Eliminar columnas', 'Eliminar filas',
                             'Renombrar columnas', 'Reemplazar valores', 'Cambiar indices']
         self.anali_datos = ['Univariante', 'Multivariante', 'Correlación']
@@ -185,6 +185,23 @@ class GuiManager:
                                                     window_title='Cargar datos...',
                                                     initial_file_path='data/',
                                                     allow_existing_files_only=True)
+            if event.ui_object_id == '#proper_load.#aceptar':
+                self.bloque.status = False
+                self.bloque.bloque.define_data(self.panel_proper.path_label.text)
+                self.panel_proper.kill()
+            if event.ui_object_id == '#proper_del_col.#aceptar':
+                self.bloque.status = False                
+                self.bloque.bloque.selected_columns = self.panel_proper.lista_columnas.get_multi_selection()
+            if event.ui_object_id == '#proper_dropnan.#aceptar':
+                self.bloque.status = False
+                self.bloque.bloque.axis = 0 if self.panel_proper.eje.selected_option == 'Fila' else 1
+                self.bloque.bloque.thresh = 1 if self.panel_proper.eje.selected_option == 'Valor' else None
+                self.bloque.bloque.how = 'all' if self.panel_proper.eje.selected_option == 'Todos' else 'any'
+            if event.ui_object_id == '#proper_ren_col.#aceptar':
+                self.bloque.status = False
+                viejos = self.panel_proper.lista_columnas.get_multi_selection()
+                nuevos = self.panel_proper.new_name.text
+                self.bloque.bloque.new_names(nuevos, viejos)
             for ind_x in range(1, 6):
                 """Recorrer acciones"""
                 if event.ui_object_id == 'panel.#p'+str(ind_x):
@@ -207,9 +224,6 @@ class GuiManager:
             print(event.ui_element)
             print(self.panel_proper.path_label.set_text(self.path))
             self.bloque.bloque.path = self.path
-                #modulo.action_block(path=self.path)
-            #event.ui_object_id.set_text('hola')
-            
 
         if event.user_type == pygame_gui.UI_DROP_DOWN_MENU_CHANGED:
             if event.ui_element == self.primer_menu:  # Elección primera acción                
@@ -249,14 +263,14 @@ class GuiManager:
                 self.bloque.action = event.text
             else:
                 size_alert = (300, 150)
+                print('jm')
                 UIMessageWindow(pygame.Rect((self.window_size[0]/2-size_alert[0]/2, 
                                              self.window_size[1]/2-size_alert[1]/2), size_alert), html_message='hhola', window_title='fin', manager=self.manager)
                 # self.alert_wi = AlertWindow('El nombre no puede estar vacio', pygame.Rect((self.window_size[0]/2-size_alert[0]/2,
                 #                             self.window_size[1]/2-size_alert[1]/2), size_alert), self.manager)
 
         if event.user_type == pygame_gui.UI_SELECTION_LIST_NEW_SELECTION:
-            self.selected_action = event.text
-            
+            self.selected_action = event.text            
 
     def draw_selected(self, screen, position):
         self.datablock.hot_draw(screen, position)
@@ -269,7 +283,11 @@ class GuiManager:
             for modulo in worker.modulos:
                 if modulo.id == 1:
                     for bloque in modulo.data_blocks:
-                        if not bloque.in_elements:
+                        if bloque.selected:
+                            bloque.bloque.procesar()
+                            #print(bloque.bloque.data.head())
+                            bloque.status = True
+                        """if not bloque.in_elements:
                             lista_iniciales.append(bloque)   
                     modulo.dict_rutas['nivel1'] = lista_iniciales
                     modulo.build_rutas(lista_iniciales)     
@@ -280,17 +298,21 @@ class GuiManager:
                             #print(bloque.bloque.procesar())
                             #print(ruta, bloque.action)    
                             #print(ruta, bloque.type)   
-                            print('--')       
+                            print('--')    """   
             self.tareas[0] = 0    
 
-    def check_block(self, bloque, position, size=(450, 300)):
+    def check_block(self, bloque, position, size=(400, 300)):
         """Acá entra si se hace click derecho"""
         self.bloque = bloque
         if bloque.action=='Fichero':
-            self.panel_proper = propiedades.ProperLoad(pygame.Rect((position[0]/2-size[0]/2, position[1]/2-size[1]/2), (size[0], size[1])), self.manager)
-        if bloque.action=='Eliminar columnas':
-            self.panel_proper = propiedades.ProperDelCol(pygame.Rect((position[0]/2-size[0]/2, position[1]/2-size[1]/2), (size[0], size[1])), self.manager)            
-        
+            self.panel_proper = propiedades.ProperLoad(pygame.Rect((position[0]/2-size[0]/2, position[1]/2-size[1]/2), (size[0], size[1]-100)), self.manager)
+        if bloque.action==self.limp_datos[0]:
+            self.panel_proper = propiedades.ProperDropnan(pygame.Rect((position[0]/2-size[0]/2, position[1]/2-size[1]/2), (size[0], size[1])), self.manager, bloque)            
+        if bloque.action==self.limp_datos[2]:
+            self.panel_proper = propiedades.ProperDelCol(pygame.Rect((position[0]/2-size[0]/2, position[1]/2-size[1]/2), (size[0], size[1])), self.manager, bloque)
+        if bloque.action==self.limp_datos[4]:
+            self.panel_proper = propiedades.ProperRenCol(pygame.Rect((position[0]/2-size[0]/2, position[1]/2-size[1]/2), (size[0]+50, size[1])), self.manager, bloque)                        
+    
     def draw_wire(self, screen, init_pos, end_line):
         pygame.draw.aaline(screen, BLACK, init_pos, end_line)
         
