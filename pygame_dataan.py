@@ -55,6 +55,7 @@ class PGData:
         position_mouse = (0, 0)  # Inicializar posicion presionad
         init_pos = (0, 0)  # Posicion inicial de la conexion
         draw_wire = False
+        draw_blue = False
         elem_ini = None
         while self.is_running:
             keys = pygame.key.get_pressed()  # Obtencion de tecla presionada
@@ -64,7 +65,8 @@ class PGData:
                     self.is_running = False
                 elif keys[K_ESCAPE]:  # Acciones al presionar tecla escape
                     gui_manager.cancel() 
-                    draw_wire = False             
+                    draw_wire = False
+                    draw_blue = False         
                     for modulo in worker.modulos:
                         if modulo.id == 1:
                             for bloque in modulo.data_blocks:
@@ -109,36 +111,58 @@ class PGData:
                                                 modulo.conections.add(conexion)
                                                 draw_wire = False
                                                 gui_manager.hold_line = False
+                                                
+                        if draw_blue:
+                            for modulo in worker.modulos:
+                                if modulo.id == 1:
+                                    for bloque in modulo.data_blocks:
+                                        for nodo_v in bloque.nodos_v:
+                                            if nodo_v.rect.collidepoint(position_mouse):
+                                                bloque.in_elements.add(elem_ini)
+                                                bloque.bloque.cargar_data(data=elem_ini.bloque.data)
+                                                for bloque_ini in modulo.data_blocks:
+                                                    if bloque_ini == elem_ini:
+                                                        bloque_ini.out_elements.add(bloque)
+                                                elem_fin = bloque
+                                                conexion = Conexion((init_pos, position_mouse),
+                                                elem_ini, elem_fin)
+                                                modulo.conections.add(conexion)
+                                                draw_blue = False
+                                                gui_manager.hold_line = False
 
                         if gui_manager.hold_line and not draw_wire:  # Iniciar conexión
                             for modulo in worker.modulos:
                                 if modulo.id == 1:
                                     for bloque in modulo.data_blocks:                                        
-                                            for nodo in bloque.nodos:
-                                                if nodo.rect.collidepoint(position_mouse):
-                                                    if not bloque.bloque.data.empty:
-                                                        draw_wire = True
-                                                        init_pos = pygame.mouse.get_pos()
-                                                        elem_ini = bloque
-                                                    else:
-                                                        UIMessageWindow(pygame.Rect((self.WINDOW_SIZE[0]/2-size_alert[0]/2, 
-                                                                                    self.WINDOW_SIZE[1]/2-size_alert[1]/2), size_alert),
-                                                                                    html_message='hholax\n adios', window_title='fin', manager=gui_manager.manager)
-                                                        gui_manager.hold_line = False
-                                                        gui_manager.editar[0] = 0
+                                        for nodo in bloque.nodos:
+                                            if nodo.rect.collidepoint(position_mouse):
+                                                if not bloque.bloque.data.empty:
+                                                    draw_wire = True
+                                                    init_pos = pygame.mouse.get_pos()
+                                                    elem_ini = bloque
+                                                else:
+                                                    UIMessageWindow(pygame.Rect((self.WINDOW_SIZE[0]/2-size_alert[0]/2, 
+                                                                                self.WINDOW_SIZE[1]/2-size_alert[1]/2), size_alert),
+                                                                                html_message='hholax\n adios', window_title='fin', manager=gui_manager.manager)
+                                                    gui_manager.hold_line = False
+                                                    gui_manager.editar[0] = 0
                                                         
-                                            for nodo_v in bloque.nodos_v:
-                                                if nodo_v.rect.collidepoint(position_mouse):
-                                                    if not bloque.bloque.data.empty:
-                                                        draw_wire = True
-                                                        init_pos = pygame.mouse.get_pos()
-                                                        elem_ini = bloque
-                                                    else:
-                                                        UIMessageWindow(pygame.Rect((self.WINDOW_SIZE[0]/2-size_alert[0]/2, 
-                                                                                    self.WINDOW_SIZE[1]/2-size_alert[1]/2), size_alert),
-                                                                                    html_message='hholax', window_title='fin', manager=gui_manager.manager)
-                                                        gui_manager.hold_line = False
-                                                        gui_manager.editar[0] = 0
+                        if gui_manager.hold_line and not draw_blue:  # Iniciar conexión
+                            for modulo in worker.modulos:
+                                if modulo.id == 1:
+                                    for bloque in modulo.data_blocks:                                                            
+                                        for nodo_v in bloque.nodos_v:
+                                            if nodo_v.rect.collidepoint(position_mouse):
+                                                if not bloque.bloque.data.empty:
+                                                    draw_blue = True
+                                                    init_pos = pygame.mouse.get_pos()
+                                                    elem_ini = bloque
+                                                else:
+                                                    UIMessageWindow(pygame.Rect((self.WINDOW_SIZE[0]/2-size_alert[0]/2, 
+                                                                                self.WINDOW_SIZE[1]/2-size_alert[1]/2), size_alert),
+                                                                                html_message='hholax', window_title='fin', manager=gui_manager.manager)
+                                                    gui_manager.hold_line = False
+                                                    gui_manager.editar[0] = 0
                                             
                     elif pygame.mouse.get_pressed()[2]:
                         """Tareas dependientes del click derecho"""

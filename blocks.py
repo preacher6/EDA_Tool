@@ -61,14 +61,21 @@ class Limpieza:
         if self.action == self.items[4]:
             self.data.rename(columns=self.asign_names, inplace=True)
             print(self.data.head())
-            
+
+
 class Explorar:
-    def __init__(self) -> None:
-        pass
+    def __init__(self, action) -> None:
+        self.data = pd.DataFrame()
+        self.action = action
+        self.items = ['Tabla', 'Descripción', 'Tipos de datos','Comportamiento']
     
     def cargar_data(self, data):
         self.data = data
     
     def procesar(self):
-        app = build_table.MyApp(self.data)
-        app.mainloop()
+        if self.action == self.items[0]:
+            app = build_table.MyApp(self.data)
+            app.mainloop()
+        if self.action == self.items[1]:
+            app = build_table.MyApp(self.data.describe())
+            app.mainloop()
