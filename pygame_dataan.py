@@ -173,7 +173,7 @@ class PGData:
                                             gui_manager.properties = False
                                             gui_manager.check_block(bloque, (ANCHO, ALTO))                                            
 
-                if event.type == pygame.USEREVENT:                    
+                if event.type == pygame.USEREVENT: 
                     gui_manager.check_event(event, position_mouse, worker)
                     gui_manager.check_actions(position_mouse, worker)
                 gui_manager.manager.process_events(event)

@@ -25,6 +25,7 @@ WHITE = (255, 255, 255)
 GRAY = (128, 128, 128)
 BLACK = (0, 0, 0)
 FUENTE = BLACK
+SIZE_ALERT = (300, 150)
 
 
 class AlertWindow(UIWindow):
@@ -64,12 +65,14 @@ class GuiManager:
         self.SIZE_WORKSPACE = workspace_size  # Tamaño del espacio de trabajo        
         self.items_choose = ['Ingesta', 'Exploración', 'Limpieza', 'Análisis', 'Transformación', 'Exportar']        
         self.ing_datos = ['Fichero', 'SQL', 'URL', 'Data toy', 'Carpeta']
-        self.explor_datos = ['Tabla', 'Descripción', 'Tipos de datos','Comportamiento']
+        self.explor_datos = ['Tabla', 'Descripción', 'Tabla dinámica', 'Tipos de datos', 'Diagrama de barras', 'Cabecera', 'Cola']
         self.limp_datos = ['Eliminar Nan', 'Reemplazar Nan', 'Eliminar columnas', 'Eliminar filas',
-                            'Renombrar columnas', 'Reemplazar valores', 'Cambiar indices']
+                            'Renombrar columnas', 'Reemplazar valores', 'Cambiar indices',
+                            'Convertir a fecha', 'Convertir a número']
         self.anali_datos = ['Univariante', 'Multivariante', 'Correlación']
-        self.transf_data = ['Agregar', 'Unir', 'Remodelar', 'Pivote', 'Filtrar', 'Particionar',
-                            'Normalizar', 'Estandarizar', 'PCA', 'ICA', 'Muestra']
+        self.transf_data = ['Agregar', 'Operar', 'Unir', 'Agrupar', 'Filtrar', 'Particionar',
+                            'Normalizar', 'Estandarizar', 'PCA', 'ICA', 'Muestra',
+                            'Remodelar']
         self.expor_datos = ['CSV']
         self.selected_type = self.items_choose[0]
         self.selected_item = 'database'
@@ -187,21 +190,47 @@ class GuiManager:
                                                     allow_existing_files_only=True)
             if event.ui_object_id == '#proper_load.#aceptar':
                 self.bloque.status = False
+                self.bloque.selected = False
                 self.bloque.bloque.define_data(self.panel_proper.path_label.text)
                 self.panel_proper.kill()
             if event.ui_object_id == '#proper_del_col.#aceptar':
                 self.bloque.status = False                
                 self.bloque.bloque.selected_columns = self.panel_proper.lista_columnas.get_multi_selection()
+                self.panel_proper.kill()
             if event.ui_object_id == '#proper_dropnan.#aceptar':
                 self.bloque.status = False
                 self.bloque.bloque.axis = 0 if self.panel_proper.eje.selected_option == 'Fila' else 1
                 self.bloque.bloque.thresh = 1 if self.panel_proper.eje.selected_option == 'Valor' else None
                 self.bloque.bloque.how = 'all' if self.panel_proper.eje.selected_option == 'Todos' else 'any'
+                self.panel_proper.kill()
             if event.ui_object_id == '#proper_ren_col.#aceptar':
                 self.bloque.status = False
                 viejos = self.panel_proper.lista_columnas.get_multi_selection()
                 nuevos = self.panel_proper.new_name.text
                 self.bloque.bloque.new_names(nuevos, viejos)
+                self.panel_proper.kill()
+            if event.ui_object_id == '#proper_turn_date.#aceptar':
+                self.bloque.status = False
+                self.bloque.bloque.elementos_fecha = self.panel_proper.lista_columnas.get_multi_selection()
+                self.panel_proper.kill()
+            if event.ui_object_id == '#proper_univ.#aceptar':
+                self.bloque.status = False
+                self.bloque.bloque.ejex = self.panel_proper.x_value.selected_option
+                self.bloque.bloque.ejey = self.panel_proper.y_value.selected_option
+                self.panel_proper.kill()
+            if event.ui_object_id == '#proper_plotbar.#aceptar':
+                self.bloque.status = False
+                self.bloque.bloque.index_barra = self.panel_proper.atributo.selected_option
+                self.bloque.bloque.type_barra = 0 if self.panel_proper.criterio.selected_option == 'Conteo' else 1 if self.panel_proper.criterio.selected_option == 'Suma' else 2
+                self.panel_proper.kill()
+            if event.ui_object_id == '#proper_tabdin.#aceptar':
+                self.bloque.status = False
+                self.bloque.bloque.index_barra = self.panel_proper.indice.selected_option
+                #self.bloque.bloque.type_barra = 0 if self.panel_proper.criterio.selected_option == 'Conteo' else 1 if self.panel_proper.criterio.selected_option == 'Suma' else 2
+                self.bloque.bloque.columna = self.panel_proper.columna.selected_option
+                self.bloque.bloque.valor = self.panel_proper.valor.selected_option
+                self.panel_proper.kill()
+
             for ind_x in range(1, 6):
                 """Recorrer acciones"""
                 if event.ui_object_id == 'panel.#p'+str(ind_x):
@@ -279,13 +308,11 @@ class GuiManager:
         if self.editar[0]:
             self.hold_line = True            
         if self.tareas[0]:
-            lista_iniciales = []
             for modulo in worker.modulos:
                 if modulo.id == 1:
                     for bloque in modulo.data_blocks:
                         if bloque.selected:
                             bloque.bloque.procesar()
-                            #print(bloque.bloque.data.head())
                             bloque.status = True
                         """if not bloque.in_elements:
                             lista_iniciales.append(bloque)   
@@ -299,8 +326,7 @@ class GuiManager:
                             #print(ruta, bloque.action)    
                             #print(ruta, bloque.type)   
                             print('--')    """   
-            self.tareas[0] = 0    
-
+            self.tareas[0] = 0 
     def check_block(self, bloque, position, size=(400, 300)):
         """Acá entra si se hace click derecho"""
         self.bloque = bloque
@@ -311,7 +337,15 @@ class GuiManager:
         if bloque.action==self.limp_datos[2]:
             self.panel_proper = propiedades.ProperDelCol(pygame.Rect((position[0]/2-size[0]/2, position[1]/2-size[1]/2), (size[0], size[1])), self.manager, bloque)
         if bloque.action==self.limp_datos[4]:
-            self.panel_proper = propiedades.ProperRenCol(pygame.Rect((position[0]/2-size[0]/2, position[1]/2-size[1]/2), (size[0]+50, size[1])), self.manager, bloque)                        
+            self.panel_proper = propiedades.ProperRenCol(pygame.Rect((position[0]/2-size[0]/2, position[1]/2-size[1]/2), (size[0]+50, size[1])), self.manager, bloque)            
+        if bloque.action==self.limp_datos[7]:
+            self.panel_proper = propiedades.ProperTurnDate(pygame.Rect((position[0]/2-size[0]/2, position[1]/2-size[1]/2), (size[0]+50, size[1])), self.manager, bloque)            
+        if bloque.action==self.anali_datos[0]:
+            self.panel_proper = propiedades.ProperUniV(pygame.Rect((position[0]/2-size[0]/2, position[1]/2-size[1]/2), (size[0]+50, size[1])), self.manager, bloque)                                                            
+        if bloque.action==self.explor_datos[3]:
+            self.panel_proper = propiedades.ProperPlotBar(pygame.Rect((position[0]/2-size[0]/2, position[1]/2-size[1]/2), (size[0]+50, size[1])), self.manager, bloque)                
+        if bloque.action==self.explor_datos[2]:
+            self.panel_proper = propiedades.ProperTabDin(pygame.Rect((position[0]/2-size[0]/2, position[1]/2-size[1]/2), (size[0]+50, size[1])), self.manager, bloque)                                                                                                        
     
     def draw_wire(self, screen, init_pos, end_line):
         pygame.draw.aaline(screen, BLACK, init_pos, end_line)
@@ -322,11 +356,3 @@ class GuiManager:
     def cancel(self):
         self.selected_block = False
         self.tareas = [0]*5
-
-    def routes(self):
-        """Definir rutas para los diferentes pipelines que se formen
-        """
-        pass
-    
-    def load_rects(self):
-        pass
