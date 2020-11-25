@@ -11,6 +11,7 @@ class OwnPipeline():
     
     def add_ingesta(self, name):
         self.grupo_ingesta[name] = Ingesta()
+        x = 5
 
 
 class Ingesta:
