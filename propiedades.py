@@ -299,6 +299,8 @@ class ProperSave(UIWindow):
         self.path_label.disable()
         self.set_blocking(True)
         
+####### EXPLORACIÓN         
+        
 class ProperPlotBar(UIWindow):
     def __init__(self, rect, ui_manager, bloque):
         super().__init__(rect, ui_manager,
@@ -355,6 +357,10 @@ class ProperPlotBar(UIWindow):
 
 
 class ProperTabDin(UIWindow):
+    """Clase para generar tablas dinámicas
+    Args:
+        UIWindow ([type]): [description]
+    """
     def __init__(self, rect, ui_manager, bloque):
         super().__init__(rect, ui_manager,
                          window_display_title='Propiedades',

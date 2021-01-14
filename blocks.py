@@ -27,8 +27,6 @@ class Ingesta:
     def procesar(self, **kwargs):
         if self.action == self.items[0]:
             self.data = pd.read_csv(self.path)
-            #print(self.data.head())
-    
 
 class Limpieza:
     def __init__(self, action) -> None:
@@ -79,11 +77,12 @@ class Explorar:
     def __init__(self, action) -> None:
         self.data = pd.DataFrame()
         self.action = action
-        self.items = ['Tabla', 'Descripción', 'Tipos de datos', 'Diagrama de barras', 'Cabecera', 'Cola']
+        self.items = ['Tabla', 'Descripción', 'Tabla dinámica', 'Tipos de datos', 'Diagrama de barras', 'Cabecera', 'Cola']
         self.index_barra = None
         self.type_barra = None
         self.columna = None
         self.valor = None
+        self.agg = None
     
     def cargar_data(self, data):
         self.data = data
@@ -115,8 +114,16 @@ class Explorar:
             new_df.plot(kind='bar')
             plt.show()
         if self.action == 'Tabla dinámica':
+            lista_agg = []
+            if 'Media' in self.agg:
+                lista_agg.append(np.mean)
+            if 'Contar' in self.agg:
+                lista_agg.append("count")
+            if 'Sumar' in self.agg:
+                lista_agg.append(np.sum)
+            print(self.agg)
             new_df = self.data.pivot_table(values=self.valor, index=self.index_barra,
-                                           columns=self.columna, aggfunc=[np.sum, np.mean]).stack()
+                                           columns=self.columna, aggfunc=lista_agg).stack()
             print(new_df)
             app = build_table.MyApp(new_df)
             app.mainloop()

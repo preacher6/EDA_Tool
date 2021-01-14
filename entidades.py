@@ -199,7 +199,7 @@ class Modulos(pygame.sprite.Sprite):
         self.dict_rutas = {}  # Contiene los niveles
         self.dict_elementos = {}  # Contiene la salida de cada elemento
 
-    def build_rutas(self, lista_iniciales):
+    """def build_rutas(self, lista_iniciales):
         self.dict_rutas['nivel1']
         iter=2
         lista_elementos = lista_iniciales        
@@ -226,7 +226,7 @@ class Modulos(pygame.sprite.Sprite):
                         data_in = [block.bloque.data for block in elemento.in_elements]
                         elemento.bloque.procesar(data=data_in)
                         self.dict_elementos[elemento.action] = elemento.bloque.data
-        print('dictx,', self.dict_elementos)
+        print('dictx,', self.dict_elementos)"""
             
 
 class MainWorker(pygame.sprite.Sprite):

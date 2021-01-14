@@ -72,7 +72,7 @@ class GuiManager:
         self.anali_datos = ['Univariante', 'Multivariante', 'Correlación']
         self.transf_data = ['Agregar', 'Operar', 'Unir', 'Agrupar', 'Filtrar', 'Particionar',
                             'Normalizar', 'Estandarizar', 'PCA', 'ICA', 'Muestra',
-                            'Remodelar']
+                            'Remodelar', 'Categorizar']
         self.expor_datos = ['CSV']
         self.selected_type = self.items_choose[0]
         self.selected_item = 'database'
@@ -187,7 +187,7 @@ class GuiManager:
                                                     self.manager,
                                                     window_title='Cargar datos...',
                                                     initial_file_path='data/',
-                                                    allow_existing_files_only=True)
+                                                    allow_existing_files_only=False)
             if event.ui_object_id == '#proper_load.#aceptar':
                 self.bloque.status = False
                 self.bloque.selected = False
@@ -229,6 +229,7 @@ class GuiManager:
                 #self.bloque.bloque.type_barra = 0 if self.panel_proper.criterio.selected_option == 'Conteo' else 1 if self.panel_proper.criterio.selected_option == 'Suma' else 2
                 self.bloque.bloque.columna = self.panel_proper.columna.selected_option
                 self.bloque.bloque.valor = self.panel_proper.valor.selected_option
+                self.bloque.bloque.agg = self.panel_proper.operacion.get_multi_selection()
                 self.panel_proper.kill()
 
             for ind_x in range(1, 6):
