@@ -228,8 +228,13 @@ class GuiManager:
                 self.bloque.bloque.index_barra = self.panel_proper.indice.selected_option
                 #self.bloque.bloque.type_barra = 0 if self.panel_proper.criterio.selected_option == 'Conteo' else 1 if self.panel_proper.criterio.selected_option == 'Suma' else 2
                 self.bloque.bloque.columna = self.panel_proper.columna.selected_option
-                self.bloque.bloque.valor = self.panel_proper.valor.selected_option
+                self.bloque.bloque.valor = self.panel_proper.valor.text
                 self.bloque.bloque.agg = self.panel_proper.operacion.get_multi_selection()
+                self.panel_proper.kill()
+            if event.ui_object_id == '#proper_repnan.#aceptar':
+                self.bloque.status = False
+                self.bloque.bloque.value = self.panel_proper.value.text
+                self.bloque.bloque.selected_columns = self.panel_proper.lista_columnas.get_multi_selection()
                 self.panel_proper.kill()
 
             for ind_x in range(1, 6):
@@ -340,13 +345,18 @@ class GuiManager:
         if bloque.action==self.limp_datos[4]:
             self.panel_proper = propiedades.ProperRenCol(pygame.Rect((position[0]/2-size[0]/2, position[1]/2-size[1]/2), (size[0]+50, size[1])), self.manager, bloque)            
         if bloque.action==self.limp_datos[7]:
-            self.panel_proper = propiedades.ProperTurnDate(pygame.Rect((position[0]/2-size[0]/2, position[1]/2-size[1]/2), (size[0]+50, size[1])), self.manager, bloque)            
+            self.panel_proper = propiedades.ProperTurnDate(pygame.Rect((position[0]/2-size[0]/2, position[1]/2-size[1]/2), (size[0]+50, size[1])), self.manager, bloque)
+        if bloque.action==self.limp_datos[1]:
+            self.panel_proper = propiedades.ReplaceNan(pygame.Rect((position[0]/2-size[0]/2, position[1]/2-size[1]/2), (size[0]+50, size[1])), self.manager, bloque)           
         if bloque.action==self.anali_datos[0]:
             self.panel_proper = propiedades.ProperUniV(pygame.Rect((position[0]/2-size[0]/2, position[1]/2-size[1]/2), (size[0]+50, size[1])), self.manager, bloque)                                                            
         if bloque.action==self.explor_datos[3]:
             self.panel_proper = propiedades.ProperPlotBar(pygame.Rect((position[0]/2-size[0]/2, position[1]/2-size[1]/2), (size[0]+50, size[1])), self.manager, bloque)                
         if bloque.action==self.explor_datos[2]:
-            self.panel_proper = propiedades.ProperTabDin(pygame.Rect((position[0]/2-size[0]/2, position[1]/2-size[1]/2), (size[0]+50, size[1])), self.manager, bloque)                                                                                                        
+            self.panel_proper = propiedades.ProperTabDin(pygame.Rect((position[0]/2-size[0]/2, position[1]/2-size[1]/2), (size[0]+50, size[1])), self.manager, bloque)
+        if bloque.action==self.explor_datos[4]:
+            #self.panel_proper = propiedades.ProperDataType(pygame.Rect((position[0]/2-size[0]/2, position[1]/2-size[1]/2), (size[0]+50, size[1])), self.manager, bloque)
+            pass
     
     def draw_wire(self, screen, init_pos, end_line):
         pygame.draw.aaline(screen, BLACK, init_pos, end_line)

@@ -42,6 +42,7 @@ class Limpieza:
         self.subset=None
         self.asign_names={}
         self.elementos_fecha = []
+        self.value = None
     
     def cargar_data(self, data):
         self.data = data
@@ -54,17 +55,20 @@ class Limpieza:
         
         
     def procesar(self, **kwargs):
-        if self.action == self.items[0]:
+        if self.action == 'Eliminar Nan':
             self.data = self.data.dropna(how=self.how, axis=self.axis, thresh=self.thresh, subset=None)
             print(self.data.head())
             print(self.data.shape)
-        if self.action == self.items[2]:
+        if self.action == 'Eliminar columnas':
             self.data = self.data.drop(self.selected_columns, axis=self.axis)
             print(self.data.head())
             print(self.data.shape)
-        if self.action == self.items[4]:
+        if self.action == 'Renombrar columnas':
             self.data.rename(columns=self.asign_names, inplace=True)
             print(self.data.head())
+        if self.action == 'Reemplazar Nan':
+            print(self.value)
+            self.data[self.selected_columns] = self.data[self.selected_columns].fillna(float(self.value))
         if self.action == self.items[7]:
             print(self.elementos_fecha[0])
             print(self.data[self.elementos_fecha[0]])
@@ -88,13 +92,13 @@ class Explorar:
         self.data = data
     
     def procesar(self):
-        if self.action == self.items[0]:
+        if self.action == self.items[0]:  # Tabla completa
             app = build_table.MyApp(self.data)
             app.mainloop()
-        if self.action == self.items[1]:
+        if self.action == self.items[1]: # Descripción
             app = build_table.MyApp(self.data.describe())
             app.mainloop()
-        if self.action == self.items[3]:
+        if self.action == 'Tipos de datos':
             print(self.data.dtypes)
             print(type(print(self.data.dtypes)))
             print(pd.DataFrame(self.data.dtypes))
@@ -126,6 +130,12 @@ class Explorar:
                                            columns=self.columna, aggfunc=lista_agg).stack()
             print(new_df)
             app = build_table.MyApp(new_df)
+            app.mainloop()
+        if self.action == 'Cabecera':
+            app = build_table.MyApp(self.data.head())
+            app.mainloop()
+        if self.action == 'Cola':
+            app = build_table.MyApp(self.data.tail())
             app.mainloop()
             
 class Analisis:
