@@ -64,16 +64,18 @@ class GuiManager:
                                             ])
         self.SIZE_WORKSPACE = workspace_size  # Tamaño del espacio de trabajo        
         self.items_choose = ['Ingesta', 'Exploración', 'Limpieza', 'Análisis', 'Transformación', 'Exportar']        
-        self.ing_datos = ['Fichero', 'SQL', 'URL', 'Data toy', 'Carpeta']
-        self.explor_datos = ['Tabla', 'Descripción', 'Tabla dinámica', 'Tipos de datos', 'Diagrama de barras', 'Cabecera', 'Cola']
+        self.ing_datos = ['Fichero', 'SQL', 'URL', 'Data toy', 'Carpeta', 'Temporal']
+        self.explor_datos = ['Tabla', 'Descripción', 'Tabla dinámica', 'Tipos de datos', 'Diagrama de barras',
+                             'Cabecera', 'Cola', 'Elementos únicos']
         self.limp_datos = ['Eliminar Nan', 'Reemplazar Nan', 'Eliminar columnas', 'Eliminar filas',
-                            'Renombrar columnas', 'Reemplazar valores', 'Cambiar indices',
-                            'Convertir a fecha', 'Convertir a número']
-        self.anali_datos = ['Univariante', 'Multivariante', 'Correlación']
-        self.transf_data = ['Agregar', 'Operar', 'Unir', 'Agrupar', 'Filtrar', 'Particionar',
+                            'Renombrar columnas', 'Reemplazar valor', 'Cambiar indice',
+                            'Convertir a fecha', 'Convertir a número', 'Convertir a categoría']
+        self.anali_datos = ['Análisis univariante', 'Análisis bivariante',
+                            'Análisis multivariante', 'Correlación']
+        self.transf_data = ['Crear columna', 'Operar', 'Unir', 'Agrupar', 'Filtrar', 'Particionar',
                             'Normalizar', 'Estandarizar', 'PCA', 'ICA', 'Muestra',
                             'Remodelar', 'Categorizar']
-        self.expor_datos = ['CSV']
+        self.expor_datos = ['CSV', 'Temporal']
         self.selected_type = self.items_choose[0]
         self.selected_item = 'database'
         self.selected_action = ''
@@ -213,11 +215,19 @@ class GuiManager:
                 self.bloque.status = False
                 self.bloque.bloque.elementos_fecha = self.panel_proper.lista_columnas.get_multi_selection()
                 self.panel_proper.kill()
-            if event.ui_object_id == '#proper_univ.#aceptar':
+            if event.ui_object_id == '#proper_turn_num.#aceptar':
                 self.bloque.status = False
-                self.bloque.bloque.ejex = self.panel_proper.x_value.selected_option
-                self.bloque.bloque.ejey = self.panel_proper.y_value.selected_option
+                self.bloque.bloque.selected_columns = self.panel_proper.lista_columnas.get_multi_selection()
                 self.panel_proper.kill()
+            if event.ui_object_id == '#proper_turn_cat.#aceptar':
+                self.bloque.status = False
+                self.bloque.bloque.selected_columns = self.panel_proper.lista_columnas.selected_option
+                self.panel_proper.kill()
+            if event.ui_object_id == '#proper_set_index.#aceptar':
+                self.bloque.status = False
+                self.bloque.bloque.index = self.panel_proper.lista_columnas.get_single_selection()
+                self.panel_proper.kill()
+            
             if event.ui_object_id == '#proper_plotbar.#aceptar':
                 self.bloque.status = False
                 self.bloque.bloque.index_barra = self.panel_proper.atributo.selected_option
@@ -235,6 +245,29 @@ class GuiManager:
                 self.bloque.status = False
                 self.bloque.bloque.value = self.panel_proper.value.text
                 self.bloque.bloque.selected_columns = self.panel_proper.lista_columnas.get_multi_selection()
+                self.panel_proper.kill()
+            if event.ui_object_id == '#proper_repval.#aceptar':
+                self.bloque.status = False
+                self.bloque.bloque.value = self.panel_proper.value.text
+                self.bloque.bloque.old_value = self.panel_proper.old_value.text
+                self.bloque.bloque.selected_columns = self.panel_proper.lista_columnas.get_multi_selection()
+                self.panel_proper.kill()
+
+            if event.ui_object_id == '#proper_unique.#aceptar':
+                self.bloque.status = False
+                self.bloque.bloque.selected_column = self.panel_proper.elementos.selected_option
+                self.panel_proper.kill()
+
+            #### Análisis 
+            if event.ui_object_id == '#proper_anauni.#aceptar':
+                self.bloque.status = False
+                self.bloque.bloque.ejex = self.panel_proper.elementos.selected_option
+                self.bloque.bloque.kind = self.panel_proper.graficos.selected_option
+                self.panel_proper.kill()
+            if event.ui_object_id == '#proper_univ.#aceptar':
+                self.bloque.status = False
+                self.bloque.bloque.ejex = self.panel_proper.x_value.selected_option
+                self.bloque.bloque.ejey = self.panel_proper.y_value.selected_option
                 self.panel_proper.kill()
 
             for ind_x in range(1, 6):
@@ -343,12 +376,20 @@ class GuiManager:
         if bloque.action==self.limp_datos[2]:
             self.panel_proper = propiedades.ProperDelCol(pygame.Rect((position[0]/2-size[0]/2, position[1]/2-size[1]/2), (size[0], size[1])), self.manager, bloque)
         if bloque.action==self.limp_datos[4]:
-            self.panel_proper = propiedades.ProperRenCol(pygame.Rect((position[0]/2-size[0]/2, position[1]/2-size[1]/2), (size[0]+50, size[1])), self.manager, bloque)            
+            self.panel_proper = propiedades.ProperRenCol(pygame.Rect((position[0]/2-size[0]/2, position[1]/2-size[1]/2), (size[0]+50, size[1])), self.manager, bloque)
+        if bloque.action=='Cambiar indice':
+            self.panel_proper = propiedades.ProperSetIndex(pygame.Rect((position[0]/2-size[0]/2, position[1]/2-size[1]/2), (size[0]+50, size[1])), self.manager, bloque)
+        if bloque.action=='Convertir a número':
+            self.panel_proper = propiedades.ProperTurnNum(pygame.Rect((position[0]/2-size[0]/2, position[1]/2-size[1]/2), (size[0]+50, size[1])), self.manager, bloque)
+        if bloque.action=='Convertir a categoría':
+            self.panel_proper = propiedades.ProperTurnCat(pygame.Rect((position[0]/2-size[0]/2, position[1]/2-size[1]/2), (size[0]+50, size[1])), self.manager, bloque)                                                
+        if bloque.action=='Reemplazar valor':
+            self.panel_proper = propiedades.ReplaceValue(pygame.Rect((position[0]/2-size[0]/2, position[1]/2-size[1]/2), (size[0]+50, size[1])), self.manager, bloque)            
         if bloque.action==self.limp_datos[7]:
             self.panel_proper = propiedades.ProperTurnDate(pygame.Rect((position[0]/2-size[0]/2, position[1]/2-size[1]/2), (size[0]+50, size[1])), self.manager, bloque)
         if bloque.action==self.limp_datos[1]:
             self.panel_proper = propiedades.ReplaceNan(pygame.Rect((position[0]/2-size[0]/2, position[1]/2-size[1]/2), (size[0]+50, size[1])), self.manager, bloque)           
-        if bloque.action==self.anali_datos[0]:
+        if bloque.action==self.anali_datos[3]:
             self.panel_proper = propiedades.ProperUniV(pygame.Rect((position[0]/2-size[0]/2, position[1]/2-size[1]/2), (size[0]+50, size[1])), self.manager, bloque)                                                            
         if bloque.action==self.explor_datos[3]:
             self.panel_proper = propiedades.ProperPlotBar(pygame.Rect((position[0]/2-size[0]/2, position[1]/2-size[1]/2), (size[0]+50, size[1])), self.manager, bloque)                
@@ -357,6 +398,13 @@ class GuiManager:
         if bloque.action==self.explor_datos[4]:
             #self.panel_proper = propiedades.ProperDataType(pygame.Rect((position[0]/2-size[0]/2, position[1]/2-size[1]/2), (size[0]+50, size[1])), self.manager, bloque)
             pass
+        if bloque.action=='Elementos únicos':
+            self.panel_proper = propiedades.ProperUnique(pygame.Rect((position[0]/2-size[0]/2, position[1]/2-size[1]/2), (size[0]+50, size[1])), self.manager, bloque)
+
+        ### Análisis
+        if bloque.action=='Análisis univariante':
+            self.panel_proper = propiedades.ProperAnaUni(pygame.Rect((position[0]/2-size[0]/2, position[1]/2-size[1]/2), (size[0]-70, size[1]-50)), self.manager, bloque)
+
     
     def draw_wire(self, screen, init_pos, end_line):
         pygame.draw.aaline(screen, BLACK, init_pos, end_line)

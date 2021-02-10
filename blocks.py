@@ -31,7 +31,7 @@ class Ingesta:
 class Limpieza:
     def __init__(self, action) -> None:
         self.items = ['Eliminar Nan', 'Reemplazar Nan', 'Eliminar columnas', 'Eliminar filas',
-                            'Renombrar columnas', 'Reemplazar valores', 'Cambiar indices',
+                            'Renombrar columnas', 'Reemplazar valores', 'Cambiar indice',
                             'Convertir a fecha', 'Convertir a número']
         self.action = action
         self.selected_columns = []
@@ -43,6 +43,8 @@ class Limpieza:
         self.asign_names={}
         self.elementos_fecha = []
         self.value = None
+        self.index = None
+        self.old_value = None  # Valor a reemplazar
     
     def cargar_data(self, data):
         self.data = data
@@ -69,12 +71,34 @@ class Limpieza:
         if self.action == 'Reemplazar Nan':
             print(self.value)
             self.data[self.selected_columns] = self.data[self.selected_columns].fillna(float(self.value))
-        if self.action == self.items[7]:
+        if self.action == 'Cambiar indice':
+            self.data.set_index(self.index, inplace=True)
+        if self.action == 'Convertir a fecha':
             print(self.elementos_fecha[0])
             print(self.data[self.elementos_fecha[0]])
             self.data = self.data[self.data[self.elementos_fecha[0]].str[0:2] != 'Or']
             self.data[self.elementos_fecha[0]] = pd.to_datetime(self.data[self.elementos_fecha[0]])
             print(self.data.head())
+        if self.action == 'Convertir a número':
+            self.data[self.selected_columns] = self.data[self.selected_columns].apply(pd.to_numeric)
+        if self.action == 'Convertir a categoría':
+            print(self.data[self.selected_columns].unique())
+            self.data[self.selected_columns] = pd.Categorical(self.data[self.selected_columns])
+            self.data[self.selected_columns] = self.data[self.selected_columns].cat.as_ordered()
+            print(self.data[self.selected_columns].unique())
+        if self.action == 'Reemplazar valor':
+            try:
+                float(self.old_value)
+                self.old_value = float(self.old_value)
+            except ValueError:
+                pass
+            try:
+                float(self.value)
+                self.value = float(self.value)
+            except ValueError:
+                pass
+
+            self.data[self.selected_columns].replace(self.old_value, self.value)
 
 
 class Explorar:
@@ -87,6 +111,7 @@ class Explorar:
         self.columna = None
         self.valor = None
         self.agg = None
+        self.selected_column = None
     
     def cargar_data(self, data):
         self.data = data
@@ -137,10 +162,15 @@ class Explorar:
         if self.action == 'Cola':
             app = build_table.MyApp(self.data.tail())
             app.mainloop()
+        if self.action == 'Elementos únicos':
+            print(self.data[self.selected_column].unique())
+            app = build_table.MyApp(pd.DataFrame(self.data[self.selected_column].unique()))
+            app.mainloop()
             
 class Analisis:
     def __init__(self, action) -> None:
-        self.items = ['Univariante', 'Multivariante', 'Correlación']
+        self.items = ['Análisis univariante', 'Análisis bivariante',
+                        'Análisis multivariante', 'Correlación']
         self.data = pd.DataFrame()
         self.action = action
         self.ejex = None
@@ -153,10 +183,12 @@ class Analisis:
         print('----')
     
     def procesar(self):
-        if self.action == self.items[0]:
-            self.data = self.data[self.data['Order Date'].str[0:2] != 'Or']
+        if self.action == 'Análisis univariante':
+            #self.data = self.data[self.data['Order Date'].str[0:2] != 'Or']
             sns.set_theme()
-            plt.plot(pd.to_numeric(self.data[self.ejex]), pd.to_numeric(self.data[self.ejey]))
+            if self.kind == 'Distribución':
+                sns.displot(data=self.data, x=self.ejex)
+            #plt.plot(pd.to_numeric(self.data[self.ejex]), pd.to_numeric(self.data[self.ejey]))
             plt.show()
 
 class Exportar:
