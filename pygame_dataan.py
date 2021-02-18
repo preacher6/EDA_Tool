@@ -101,16 +101,29 @@ class PGData:
                                         for nodo in bloque.nodos:
                                             if nodo.rect.collidepoint(position_mouse):
                                                 bloque.in_elements.add(elem_ini)
-                                                bloque.bloque.cargar_data(data=elem_ini.bloque.data)
-                                                for bloque_ini in modulo.data_blocks:
-                                                    if bloque_ini == elem_ini:
-                                                        bloque_ini.out_elements.add(bloque)
-                                                elem_fin = bloque
-                                                conexion = Conexion((init_pos, position_mouse),
-                                                elem_ini, elem_fin)
-                                                modulo.conections.add(conexion)
-                                                draw_wire = False
-                                                gui_manager.hold_line = False
+                                                join = False  # Flag para 2 dataframes (caso de join)
+                                                if not bloque.bloque.data.empty:
+                                                    if bloque.bloque.id == 'Transformacion':
+                                                        print('trafo')
+                                                        bloque.bloque.cargar_data(data2=elem_ini.bloque.data)
+                                                        join = True
+                                                else:
+                                                    if bloque.bloque.data.empty:
+                                                        bloque.bloque.cargar_data(data=elem_ini.bloque.data)
+                                                
+                                                if bloque.bloque.data.empty or join:
+                                                    print('une')
+                                                    for bloque_ini in modulo.data_blocks:
+                                                        if bloque_ini == elem_ini:
+                                                            bloque_ini.out_elements.add(bloque)
+                                                    elem_fin = bloque
+                                                    conexion = Conexion((init_pos, position_mouse),
+                                                    elem_ini, elem_fin)
+                                                    modulo.conections.add(conexion)
+                                                    draw_wire = False
+                                                    gui_manager.hold_line = False
+                                                else:
+                                                    ('no une')
                                                 
                         if draw_blue:
                             for modulo in worker.modulos:

@@ -264,11 +264,18 @@ class GuiManager:
                 self.bloque.bloque.ejex = self.panel_proper.elementos.selected_option
                 self.bloque.bloque.kind = self.panel_proper.graficos.selected_option
                 self.panel_proper.kill()
-            if event.ui_object_id == '#proper_univ.#aceptar':
+            if event.ui_object_id == '#proper_anabi.#aceptar':
                 self.bloque.status = False
                 self.bloque.bloque.ejex = self.panel_proper.x_value.selected_option
                 self.bloque.bloque.ejey = self.panel_proper.y_value.selected_option
+                self.bloque.bloque.kind = self.panel_proper.grafico.selected_option
                 self.panel_proper.kill()
+            if event.ui_object_id == '#proper_anamult.#aceptar':
+                self.bloque.status = False
+                self.bloque.bloque.atributo = self.panel_proper.atributo.selected_option
+                self.bloque.bloque.columnas = self.panel_proper.lista_columnas.get_multi_selection()
+                self.panel_proper.kill()
+            
 
             for ind_x in range(1, 6):
                 """Recorrer acciones"""
@@ -325,6 +332,12 @@ class GuiManager:
                     self.reasign1(self.expor_datos)
                     self.selected_item = 'exportar'
                     self.selected_action = ''
+            
+            if event.ui_object_id == '#proper_anamult.#atributo':
+                if event.text == 'Todas':
+                    self.panel_proper.lista_columnas.disable()
+                else:
+                    self.panel_proper.lista_columnas.enable()
 
         if event.user_type == pygame_gui.UI_TEXT_ENTRY_FINISHED:
             if event.text:
@@ -389,8 +402,8 @@ class GuiManager:
             self.panel_proper = propiedades.ProperTurnDate(pygame.Rect((position[0]/2-size[0]/2, position[1]/2-size[1]/2), (size[0]+50, size[1])), self.manager, bloque)
         if bloque.action==self.limp_datos[1]:
             self.panel_proper = propiedades.ReplaceNan(pygame.Rect((position[0]/2-size[0]/2, position[1]/2-size[1]/2), (size[0]+50, size[1])), self.manager, bloque)           
-        if bloque.action==self.anali_datos[3]:
-            self.panel_proper = propiedades.ProperUniV(pygame.Rect((position[0]/2-size[0]/2, position[1]/2-size[1]/2), (size[0]+50, size[1])), self.manager, bloque)                                                            
+        if bloque.action=='Análisis bivariante':
+            self.panel_proper = propiedades.ProperAnaBi(pygame.Rect((position[0]/2-size[0]/2, position[1]/2-size[1]/2), (size[0]+50, size[1])), self.manager, bloque)                                                            
         if bloque.action==self.explor_datos[3]:
             self.panel_proper = propiedades.ProperPlotBar(pygame.Rect((position[0]/2-size[0]/2, position[1]/2-size[1]/2), (size[0]+50, size[1])), self.manager, bloque)                
         if bloque.action==self.explor_datos[2]:
@@ -404,7 +417,12 @@ class GuiManager:
         ### Análisis
         if bloque.action=='Análisis univariante':
             self.panel_proper = propiedades.ProperAnaUni(pygame.Rect((position[0]/2-size[0]/2, position[1]/2-size[1]/2), (size[0]-70, size[1]-50)), self.manager, bloque)
+        if bloque.action=='Análisis multivariante':
+            self.panel_proper = propiedades.ProperAnaMult(pygame.Rect((position[0]/2-size[0]/2, position[1]/2-size[1]/2), (size[0]-60, size[1]-20)), self.manager, bloque)
 
+        ### Transformar
+        if bloque.action=='Unir':
+            self.panel_proper = propiedades.ProperJoin(pygame.Rect((position[0]/2-size[0]/2, position[1]/2-size[1]/2), (size[0]+50, size[1])), self.manager, bloque)
     
     def draw_wire(self, screen, init_pos, end_line):
         pygame.draw.aaline(screen, BLACK, init_pos, end_line)

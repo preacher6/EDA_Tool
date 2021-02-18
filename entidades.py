@@ -69,6 +69,8 @@ class DataBlock(pygame.sprite.Sprite):
             return blocks.Explorar(self.action)
         if self.type == 'Análisis':
             return blocks.Analisis(self.action)
+        if self.type == 'Transformación':
+            return blocks.Transformacion(self.action)
         
     def definir_nodos(self):
         if self.type not in ['Ingesta', 'Exploración', 'Análisis']:

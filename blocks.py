@@ -16,6 +16,7 @@ class OwnPipeline():
 
 class Ingesta:
     def __init__(self, action) -> None:
+        self.id = 'Ingesta'
         self.items = ['Fichero', 'SQL', 'URL', 'Data toy', 'Carpeta']
         self.action = action
         self.data = pd.DataFrame()
@@ -30,6 +31,8 @@ class Ingesta:
 
 class Limpieza:
     def __init__(self, action) -> None:
+        self.id = 'Limpieza'
+        self.data = pd.DataFrame()
         self.items = ['Eliminar Nan', 'Reemplazar Nan', 'Eliminar columnas', 'Eliminar filas',
                             'Renombrar columnas', 'Reemplazar valores', 'Cambiar indice',
                             'Convertir a fecha', 'Convertir a número']
@@ -53,8 +56,7 @@ class Limpieza:
     
     def new_names(self, nuevos, viejos):
         self.asign_names = dict(zip(viejos, nuevos.split(',')))
-        print(self.asign_names)
-        
+        print(self.asign_names)        
         
     def procesar(self, **kwargs):
         if self.action == 'Eliminar Nan':
@@ -103,6 +105,7 @@ class Limpieza:
 
 class Explorar:
     def __init__(self, action) -> None:
+        self.id = 'Explorar'
         self.data = pd.DataFrame()
         self.action = action
         self.items = ['Tabla', 'Descripción', 'Tabla dinámica', 'Tipos de datos', 'Diagrama de barras', 'Cabecera', 'Cola']
@@ -169,6 +172,7 @@ class Explorar:
             
 class Analisis:
     def __init__(self, action) -> None:
+        self.id = 'Analisis'
         self.items = ['Análisis univariante', 'Análisis bivariante',
                         'Análisis multivariante', 'Correlación']
         self.data = pd.DataFrame()
@@ -176,6 +180,8 @@ class Analisis:
         self.ejex = None
         self.ejey = None
         self.kind = 'plot'
+        self.atributo = None
+        self.columnas = []
     
     def cargar_data(self, data):
         self.data = data
@@ -188,8 +194,47 @@ class Analisis:
             sns.set_theme()
             if self.kind == 'Distribución':
                 sns.displot(data=self.data, x=self.ejex)
+            elif self.kind == 'Caja':
+                sns.boxplot(data=self.data, x=self.ejex)
+            elif self.kind == 'Conteo':
+                sns.countplot(data=self.data, x=self.ejex)
+
             #plt.plot(pd.to_numeric(self.data[self.ejex]), pd.to_numeric(self.data[self.ejey]))
             plt.show()
+        if self.action == 'Análisis bivariante':
+            sns.set_theme()
+            if self.kind == 'Relación':
+                sns.jointplot(x=self.ejex, y=self.ejey, data=self.data)
+            elif self.kind == 'Regresión':
+                sns.lmplot(x=self.ejex, y=self.ejey, data=self.data)
+            elif self.kind == 'Conteo':
+                sns.countplot(x=self.ejex, hue=self.ejey, data=self.data)
+            
+            plt.show()
+
+        if self.action == 'Análisis multivariante':
+            if self.atributo == 'Todas':
+                sns.pairplot(self.data)
+            else:
+                sns.pairplot(self.data[self.columnas])
+            
+            plt.show()
+
+
+class Transformacion:
+    def __init__(self):
+        self.data = pd.DataFrame()
+        self.data2 = pd.DataFrame()
+        self.id = 'Transformacion'
+
+    def cargar_data(self, data):
+        self.data = data
+        print(self.data.head())
+        print('----')
+
+    def procesar(self):
+        if self.action == 'Unir':
+            pass
 
 class Exportar:
     def __init__(self, action):
