@@ -203,6 +203,7 @@ class PGData:
             if gui_manager.selected_block:
                 gui_manager.draw_selected(self.window_surface, abs_position)
             gui_manager.manager.draw_ui(self.window_surface) # Dibujar elementos pygame_gui
+            self.window_surface.blit(self.font.render('BlockEDA', True, (255, 255, 255)), (450, 20))
             pygame.display.update()
 
    

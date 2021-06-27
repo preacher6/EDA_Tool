@@ -365,7 +365,8 @@ class GuiManager:
                     for bloque in modulo.data_blocks:
                         if bloque.selected:
                             bloque.bloque.procesar()
-                            bloque.status = True
+                            if not bloque.bloque.error:
+                                bloque.status = True
                         """if not bloque.in_elements:
                             lista_iniciales.append(bloque)   
                     modulo.dict_rutas['nivel1'] = lista_iniciales

@@ -21,13 +21,18 @@ class Ingesta:
         self.action = action
         self.data = pd.DataFrame()
         self.path = ''
+        self.error = False
 
     def define_data(self, path):
         self.path = path
         
     def procesar(self, **kwargs):
         if self.action == self.items[0]:
-            self.data = pd.read_csv(self.path)
+            try:
+                self.data = pd.read_csv(self.path)
+            except:
+                self.error = True
+                print('El directorio no existe')
 
 class Limpieza:
     def __init__(self, action) -> None:
