@@ -83,7 +83,8 @@ class GuiManager:
         self.proc_datos = ['Explorar datos', 'Limpiar datos', 'Transformar datos']
         self.properties = False
         self.validar = []
-
+        self.selected_model = 'Modelo 1'  # Modelo seleccionad
+        self.selected_id = 1
         self.selected_block = False  # Indica si se esta dibujando algun bloque en pantalla
         self.tareas = [0]*5
         self.editar = [0]*4
@@ -126,6 +127,7 @@ class GuiManager:
                                                         (210, 30)),
                                             self.manager,
                                             container=self.panel_modulos)
+
         self.new = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((40, 60), (35, 35)),
                                             text='',
                                             manager=self.manager,
@@ -172,6 +174,10 @@ class GuiManager:
         self.workspace = pygame.Surface(self.SIZE_WORKSPACE)
         self.workspace.fill(LIGHTGRAY)
         self.pos_workspace = (270, 160)
+        datab = DataBlock((0, 0), 'database') # La recta sobre la que se pueden poner bloques
+        x, y = datab.image.get_size()
+        self.rect_workspace = pygame.Rect((self.pos_workspace[0]+x/2, self.pos_workspace[1]+y/2),
+                                            (self.SIZE_WORKSPACE[0]-x, self.SIZE_WORKSPACE[1]-y))
 
 
     def reasign1(self, lista):
@@ -182,6 +188,7 @@ class GuiManager:
     
     def check_event(self, event, position, worker, image=None):
         if event.user_type == pygame_gui.UI_BUTTON_PRESSED:
+            print(event.ui_object_id)
             if event.ui_object_id == '#warning_window.button':
                 self.alert_wi.kill()
             if event.ui_object_id == '#proper_load.#folder':
@@ -190,11 +197,27 @@ class GuiManager:
                                                     window_title='Cargar datos...',
                                                     initial_file_path='data/',
                                                     allow_existing_files_only=False)
+                print(1)
+                print(self.file_dialog)
+            if event.ui_object_id == '#file_dialog.#ok_button':
+                # print(self.file_dialog.file_selection_list)
+                # print(self.file_dialog.file_path_text_line)
+                print(self.file_dialog.current_file_path)
+                # print(self.file_dialog.current_file_list)
+                # print(self.file_dialog.current_directory_path)
+                # print(dir(self.file_dialog))
+                self.panel_proper.path_label.set_text(create_resource_path(self.file_dialog.current_file_path))
+
             if event.ui_object_id == '#proper_load.#aceptar':
+
                 self.bloque.status = False
                 self.bloque.selected = False
                 self.bloque.bloque.define_data(self.panel_proper.path_label.text)
                 self.panel_proper.kill()
+                self.selected_type = self.items_choose[0]
+                self.reasign1(self.ing_datos)
+                self.selected_item = 'database'
+                self.selected_action = ''
             if event.ui_object_id == '#proper_del_col.#aceptar':
                 self.bloque.status = False                
                 self.bloque.bloque.selected_columns = self.panel_proper.lista_columnas.get_multi_selection()
@@ -276,29 +299,61 @@ class GuiManager:
                 self.bloque.bloque.columnas = self.panel_proper.lista_columnas.get_multi_selection()
                 self.panel_proper.kill()
             
+            if event.ui_object_id == 'panel.#new':  # Crear nuevo módulo
+                worker.num_modulos+=1
+                modulo = Modulos(worker.num_modulos)
+                worker.modulos.add(modulo)
+                elementos = [modelo.name for modelo in worker.modulos]
+                self.modelo.kill()
+                self.modelo = UIDropDownMenu(elementos,
+                                            elementos[0],
+                                            pygame.Rect((10, 10),
+                                                        (210, 30)),
+                                            self.manager,
+                                            container=self.panel_modulos)
+                                        
+            if event.ui_object_id == 'panel.#del':  # Eliminar módulo
+                [worker.modulos.remove(modulo) for modulo in worker.modulos if modulo.name == self.selected_model]
+                
+                self.modelo.kill()
+                
+                if not worker.modulos:
+                    worker.num_modulos+=1
+                    modulo = Modulos(worker.num_modulos)
+                    worker.modulos.add(modulo)
 
+                elementos = [modelo.name for modelo in worker.modulos]
+                self.modelo = UIDropDownMenu(elementos,
+                                            elementos[0],
+                                            pygame.Rect((10, 10),
+                                                        (210, 30)),
+                                            self.manager,
+                                            container=self.panel_modulos)
+
+                self.selected_model = elementos[0]
+            
+            if event.ui_object_id == 'panel.#rename':  # Renombrar módulo
+                pass
+                
             for ind_x in range(1, 6):
                 """Recorrer acciones"""
                 if event.ui_object_id == 'panel.#p'+str(ind_x):
-                    self.cancel()
+                    self.cancel(worker.modulos)
                     self.tareas[ind_x-1] = 1
 
             for ind_x in range(1, 5):
                 """Recorrer edicion"""
                 if event.ui_object_id == 'panel.#e'+str(ind_x):
-                    self.cancel()
+                    self.cancel(worker.modulos)
                     self.editar[ind_x-1] = 1
 
             if event.ui_element == self.select and self.selected_action:  # Selecciona un objeto
                 self.selected_block = True
                 self.datablock = DataBlock(position, self.selected_item, type=self.selected_action)
         
-        if event.user_type == pygame_gui.UI_FILE_DIALOG_PATH_PICKED:
-            self.path = create_resource_path(event.text)
-            print(self.path)
-            print(event.ui_element)
-            print(self.panel_proper.path_label.set_text(self.path))
-            self.bloque.bloque.path = self.path
+        # if event.user_type == pygame_gui.UI_FILE_DIALOG_PATH_PICKED:
+        #     self.path = create_resource_path(event.text)
+        #     self.bloque.bloque.path = self.path
 
         if event.user_type == pygame_gui.UI_DROP_DOWN_MENU_CHANGED:
             if event.ui_element == self.primer_menu:  # Elección primera acción                
@@ -339,6 +394,9 @@ class GuiManager:
                 else:
                     self.panel_proper.lista_columnas.enable()
 
+            if event.ui_element == self.modelo:
+                self.selected_model = event.text
+
         if event.user_type == pygame_gui.UI_TEXT_ENTRY_FINISHED:
             if event.text:
                 self.bloque.action = event.text
@@ -367,6 +425,10 @@ class GuiManager:
                             bloque.bloque.procesar()
                             if not bloque.bloque.error:
                                 bloque.status = True
+                            else:
+                                size_alert = (300, 150)
+                                UIMessageWindow(pygame.Rect((self.window_size[0]/2-size_alert[0]/2, 
+                                             self.window_size[1]/2-size_alert[1]/2), size_alert), html_message=bloque.bloque.msg, window_title='Error', manager=self.manager)
                         """if not bloque.in_elements:
                             lista_iniciales.append(bloque)   
                     modulo.dict_rutas['nivel1'] = lista_iniciales
@@ -384,7 +446,7 @@ class GuiManager:
         """Acá entra si se hace click derecho"""
         self.bloque = bloque
         if bloque.action=='Fichero':
-            self.panel_proper = propiedades.ProperLoad(pygame.Rect((position[0]/2-size[0]/2, position[1]/2-size[1]/2), (size[0], size[1]-100)), self.manager)
+            self.panel_proper = propiedades.ProperLoad(pygame.Rect((position[0]/2-size[0]/2, position[1]/2-size[1]/2), (size[0], size[1]-100)), self.manager, bloque)
         if bloque.action==self.limp_datos[0]:
             self.panel_proper = propiedades.ProperDropnan(pygame.Rect((position[0]/2-size[0]/2, position[1]/2-size[1]/2), (size[0], size[1])), self.manager, bloque)            
         if bloque.action==self.limp_datos[2]:
@@ -431,6 +493,9 @@ class GuiManager:
     def run_pipeline(self):
         self.routes()
         
-    def cancel(self):
+    def cancel(self, modulos):
+        # for modulo in modulos:
+        #         for bloque in modulo.data_blocks:
+        #             bloque.selected = False
         self.selected_block = False
         self.tareas = [0]*5

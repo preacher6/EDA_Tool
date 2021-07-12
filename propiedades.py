@@ -8,7 +8,7 @@ from pygame_gui.elements import UISelectionList, UIDropDownMenu
 ##### INGESTA
 
 class ProperLoad(UIWindow):
-    def __init__(self, rect, ui_manager):
+    def __init__(self, rect, ui_manager, bloque):
         super().__init__(rect, ui_manager,
                          window_display_title='Propiedades',
                          object_id='#proper_load',
@@ -39,11 +39,13 @@ class ProperLoad(UIWindow):
                                                 container=self,
                                                 parent_element=self,
                                                 object_id='pathdir')
+        self.path_label.set_text(bloque.bloque.path)
         self.aceptar = UIButton(relative_rect=pygame.Rect((top_left+120, 100), (90, 35)),
                                             text='Aceptar',
                                             manager=ui_manager,
                                             container=self,
                                             object_id='#aceptar')
+        print(self.path_label)
         self.path_label.disable()
         self.set_blocking(True)
 

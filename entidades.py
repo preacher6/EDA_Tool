@@ -198,6 +198,7 @@ class Modulos(pygame.sprite.Sprite):
         self.data_blocks = pygame.sprite.Group()
         self.conections = pygame.sprite.Group()  # Guarda las conexiones del contenedor
         self.id = identidad
+        self.name = 'Modelo '+str(self.id)
         self.dict_rutas = {}  # Contiene los niveles
         self.dict_elementos = {}  # Contiene la salida de cada elemento
 
@@ -236,16 +237,18 @@ class MainWorker(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
         self.modulos = pygame.sprite.Group()
+        self.num_modulos=0
 
-    def draw_all(self, screen, position):
+    def draw_all(self, screen, position, selected):
         for modulo in self.modulos:
-            for conexion in modulo.conections:
-                conexion.draw(screen)
-            for data in modulo.data_blocks:
-                data.draw(screen)
-                for boton in data.botones:
-                    if boton[1].collidepoint(position):
-                        print('in')            
+            if modulo.name == selected:
+                for conexion in modulo.conections:
+                    conexion.draw(screen)
+                for data in modulo.data_blocks:
+                    data.draw(screen)
+                    for boton in data.botones:
+                        if boton[1].collidepoint(position):
+                            print('in')            
 
     def add_nodo(self, screen, position, modulo):
         for bloque in modulo.data_blocks:

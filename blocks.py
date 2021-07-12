@@ -22,6 +22,7 @@ class Ingesta:
         self.data = pd.DataFrame()
         self.path = ''
         self.error = False
+        self.msg = ''
 
     def define_data(self, path):
         self.path = path
@@ -30,9 +31,10 @@ class Ingesta:
         if self.action == self.items[0]:
             try:
                 self.data = pd.read_csv(self.path)
+                print(self.data)
             except:
                 self.error = True
-                print('El directorio no existe')
+                self.msg = 'El archivo no existe o es inválido'
 
 class Limpieza:
     def __init__(self, action) -> None:
@@ -53,6 +55,7 @@ class Limpieza:
         self.value = None
         self.index = None
         self.old_value = None  # Valor a reemplazar
+        self.error = False
     
     def cargar_data(self, data):
         self.data = data
@@ -120,6 +123,7 @@ class Explorar:
         self.valor = None
         self.agg = None
         self.selected_column = None
+        self.error = False
     
     def cargar_data(self, data):
         self.data = data
@@ -187,6 +191,7 @@ class Analisis:
         self.kind = 'plot'
         self.atributo = None
         self.columnas = []
+        self.error = False
     
     def cargar_data(self, data):
         self.data = data
@@ -231,6 +236,7 @@ class Transformacion:
         self.data = pd.DataFrame()
         self.data2 = pd.DataFrame()
         self.id = 'Transformacion'
+        self.error = False
 
     def cargar_data(self, data):
         self.data = data
@@ -248,6 +254,7 @@ class Exportar:
         self.action = action
         self.path = ''
         self.nombre = ''
+        self.error = False
     
     def cargar_data(self, data):
         self.data = data
