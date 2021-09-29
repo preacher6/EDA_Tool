@@ -59,7 +59,7 @@
             }
         }
     },    
-    "#p2":
+    "#p21":
     {
         "images":
                {
@@ -69,7 +69,7 @@
         }
     },
     
-    "#p3":
+    "#p31":
     {
         "images":
                {
@@ -78,7 +78,7 @@
             }
         }
     },    
-    "#p4":
+    "#p41":
     {
         "images":
                {
@@ -87,7 +87,7 @@
             }
         }
     },        
-    "#p5":
+    "#p51":
     {
         "images":
                {
@@ -96,7 +96,7 @@
             }
         }
     },
-    "#e1":
+    "#p2":
     {
         "images":
                {
@@ -105,7 +105,7 @@
             }
         }
     },
-    "#e2":
+    "#p3":
     {
         "images":
                {
@@ -114,7 +114,7 @@
             }
         }
     },
-    "#e3":
+    "#p4":
     {
         "images":
                {
@@ -123,12 +123,30 @@
             }
         }
     },
-    "#e4":
+    "#p5":
     {
         "images":
                {
             "normal_image": {
                 "path": "pics/icons/borrar.png"
+            }
+        }
+    },
+    "#p6":
+    {
+        "images":
+               {
+            "normal_image": {
+                "path": "pics/icons/help.png"
+            }
+        }
+    },
+    "#p7":
+    {
+        "images":
+               {
+            "normal_image": {
+                "path": "pics/icons/info.png"
             }
         }
     },
@@ -172,6 +190,15 @@
         }
     },
     "#folder":
+    {
+        "images":
+        {
+            "normal_image": {
+                "path": "pics/icons/folder.png"
+            }
+        }
+    },
+    "#folder_csv":
     {
         "images":
         {

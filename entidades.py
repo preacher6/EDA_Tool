@@ -71,6 +71,8 @@ class DataBlock(pygame.sprite.Sprite):
             return blocks.Analisis(self.action)
         if self.type == 'Transformación':
             return blocks.Transformacion(self.action)
+        if self.type == 'Exportar':
+            return blocks.Exportar(self.action)
         
     def definir_nodos(self):
         if self.type not in ['Ingesta', 'Exploración', 'Análisis']:
@@ -115,7 +117,8 @@ class DataBlock(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.center = self.position
 
-    def draw(self, screen):        
+    def draw(self, screen):   
+        # print(self.status)     
         if not self.selected:
             self.image = pygame.image.load(os.path.join('pics', 'images', 'block.png'))
         else:
@@ -248,7 +251,7 @@ class MainWorker(pygame.sprite.Sprite):
                     data.draw(screen)
                     for boton in data.botones:
                         if boton[1].collidepoint(position):
-                            print('in')            
+                            pass    
 
     def add_nodo(self, screen, position, modulo):
         for bloque in modulo.data_blocks:

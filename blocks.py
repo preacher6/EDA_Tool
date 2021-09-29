@@ -23,14 +23,23 @@ class Ingesta:
         self.path = ''
         self.error = False
         self.msg = ''
+        self.sep = ','
 
     def define_data(self, path):
+        print(path)
         self.path = path
+
+    def define_path(self, option_path):
+        if option_path == 'Titanic':
+            self.path = 'D:\proyectos_git\Auto_EDA\EDA_Tool\data\titanic.csv'
+        elif option_path == 'Flores':
+            self.path = ''
         
     def procesar(self, **kwargs):
-        if self.action == self.items[0]:
+        if self.action == self.items[0] or self.action == self.items[2]:
             try:
-                self.data = pd.read_csv(self.path)
+                print(self.sep)
+                self.data = pd.read_csv(self.path, sep=self.sep)
                 print(self.data)
             except:
                 self.error = True
@@ -44,7 +53,7 @@ class Limpieza:
                             'Renombrar columnas', 'Reemplazar valores', 'Cambiar indice',
                             'Convertir a fecha', 'Convertir a número']
         self.action = action
-        self.selected_columns = []
+        self.selected_columns = None
         self.own_dicto = {}
         self.axis=1
         self.how='any'
@@ -59,43 +68,35 @@ class Limpieza:
     
     def cargar_data(self, data):
         self.data = data
-        print(self.data.head())
-        print('----')
     
     def new_names(self, nuevos, viejos):
         self.asign_names = dict(zip(viejos, nuevos.split(',')))
-        print(self.asign_names)        
         
     def procesar(self, **kwargs):
         if self.action == 'Eliminar Nan':
-            self.data = self.data.dropna(how=self.how, axis=self.axis, thresh=self.thresh, subset=None)
-            print(self.data.head())
-            print(self.data.shape)
+            if self.axis == 2:
+                self.data = self.data.dropna(how=self.how, axis=0, thresh=self.thresh, subset=self.selected_columns)
+            else:
+                self.data = self.data.dropna(how=self.how, axis=self.axis, thresh=self.thresh)
         if self.action == 'Eliminar columnas':
             self.data = self.data.drop(self.selected_columns, axis=self.axis)
-            print(self.data.head())
-            print(self.data.shape)
         if self.action == 'Renombrar columnas':
             self.data.rename(columns=self.asign_names, inplace=True)
-            print(self.data.head())
         if self.action == 'Reemplazar Nan':
-            print(self.value)
             self.data[self.selected_columns] = self.data[self.selected_columns].fillna(float(self.value))
         if self.action == 'Cambiar indice':
             self.data.set_index(self.index, inplace=True)
         if self.action == 'Convertir a fecha':
-            print(self.elementos_fecha[0])
-            print(self.data[self.elementos_fecha[0]])
             self.data = self.data[self.data[self.elementos_fecha[0]].str[0:2] != 'Or']
             self.data[self.elementos_fecha[0]] = pd.to_datetime(self.data[self.elementos_fecha[0]])
-            print(self.data.head())
+            
         if self.action == 'Convertir a número':
             self.data[self.selected_columns] = self.data[self.selected_columns].apply(pd.to_numeric)
         if self.action == 'Convertir a categoría':
-            print(self.data[self.selected_columns].unique())
+            
             self.data[self.selected_columns] = pd.Categorical(self.data[self.selected_columns])
             self.data[self.selected_columns] = self.data[self.selected_columns].cat.as_ordered()
-            print(self.data[self.selected_columns].unique())
+            
         if self.action == 'Reemplazar valor':
             try:
                 float(self.old_value)
@@ -120,6 +121,7 @@ class Explorar:
         self.index_barra = None
         self.type_barra = None
         self.columna = None
+        self.columna2 = None
         self.valor = None
         self.agg = None
         self.selected_column = None
@@ -136,23 +138,17 @@ class Explorar:
             app = build_table.MyApp(self.data.describe())
             app.mainloop()
         if self.action == 'Tipos de datos':
-            print(self.data.dtypes)
-            print(type(print(self.data.dtypes)))
-            print(pd.DataFrame(self.data.dtypes))
             data = pd.DataFrame(self.data.dtypes).rename(columns={0:'Tipo'})
             app = build_table.MyApp(data)
             app.mainloop()
         if self.action == self.items[4]:  # Diagrama de barras
-            print(self.type_barra)
             sns.set_theme()
             new_df = self.data.copy()
             if self.type_barra==0:
-                new_df = new_df.groupby(self.index_barra).count()
+                new_serie = new_df[self.columna].value_counts()
             elif self.type_barra==1:
-                new_df = new_df.groupby(self.index_barra).sum()
-            else:
-                new_df = new_df.groupby(self.index_barra).mean()
-            new_df.plot(kind='bar')
+                new_serie =  pd.crosstab(new_df[self.columna], new_df[self.columna2])
+            new_serie.plot(kind='bar')
             plt.show()
         if self.action == 'Tabla dinámica':
             lista_agg = []
@@ -162,10 +158,8 @@ class Explorar:
                 lista_agg.append("count")
             if 'Sumar' in self.agg:
                 lista_agg.append(np.sum)
-            print(self.agg)
-            new_df = self.data.pivot_table(values=self.valor, index=self.index_barra,
-                                           columns=self.columna, aggfunc=lista_agg).stack()
-            print(new_df)
+            new_df = self.data.pivot_table(values=self.valor, columns=self.columna,
+                                            aggfunc=lista_agg).stack()
             app = build_table.MyApp(new_df)
             app.mainloop()
         if self.action == 'Cabecera':
@@ -175,7 +169,6 @@ class Explorar:
             app = build_table.MyApp(self.data.tail())
             app.mainloop()
         if self.action == 'Elementos únicos':
-            print(self.data[self.selected_column].unique())
             app = build_table.MyApp(pd.DataFrame(self.data[self.selected_column].unique()))
             app.mainloop()
             
@@ -195,8 +188,6 @@ class Analisis:
     
     def cargar_data(self, data):
         self.data = data
-        print(self.data.head())
-        print('----')
     
     def procesar(self):
         if self.action == 'Análisis univariante':
@@ -232,20 +223,138 @@ class Analisis:
 
 
 class Transformacion:
-    def __init__(self):
+    def __init__(self, action):
         self.data = pd.DataFrame()
         self.data2 = pd.DataFrame()
         self.id = 'Transformacion'
         self.error = False
+        self.action = action
+        self.new_variable = ''
+        self.selected_variable = ''
+        self.selected_variable2 = ''
+        self.operation = None
+        self.valor = None
+        self.valor2= None
+        self.condicion = None
+        self.condicion2 = None
+        self.tipo_cond = None
+        self.tipo_cond2 = None
+        self.selected_variables = []
 
     def cargar_data(self, data):
         self.data = data
-        print(self.data.head())
-        print('----')
+        
+    def cargar_data2(self, data2):
+        self.data2 = data2
 
     def procesar(self):
         if self.action == 'Unir':
             pass
+        if self.action == 'Operar dos columnas':
+            if self.operation == 'Sumar':
+                funco = lambda x: x[0] + x[1]
+            elif self.operation == 'Restar':
+                funco = lambda x: x[0] - x[1]
+            elif self.operation == 'Multiplicar':
+                funco = lambda x: x[0] * x[1]
+            elif self.operation == 'Dividir':
+                funco = lambda x: x[0] / x[1]
+            self.data[self.new_variable] = self.data[[self.selected_variable, self.selected_variable2]].apply(funco, axis=1)
+
+        if self.action == 'Operar una columna':
+            self.valor = float(self.valor)
+            if self.operation == 'Sumar':
+                funco = lambda x: x + self.valor
+            elif self.operation == 'Restar':
+                funco = lambda x: x - self.valor
+            elif self.operation == 'Multiplicar':
+                funco = lambda x: x * self.valor
+            elif self.operation == 'Dividir':
+                funco = lambda x: x / self.valor
+            elif self.operation == 'Elevar':
+                funco = lambda x: x ** self.valor
+            self.data[self.new_variable] = self.data[self.selected_variable].apply(funco)
+
+        if self.action == 'Filtrar una columna':
+            if self.tipo_cond == 'Numérico':
+                self.valor = float(self.valor)
+                if self.condicion == '==':
+                    self.data = self.data[self.data[self.selected_variable] == self.valor]
+                if self.condicion == '!=':
+                    self.data = self.data[self.data[self.selected_variable] != self.valor]
+                if self.condicion == '>':
+                    self.data = self.data[self.data[self.selected_variable] > self.valor]
+                if self.condicion == '<':
+                    self.data = self.data[self.data[self.selected_variable] < self.valor]
+                if self.condicion == '>=':
+                    self.data = self.data[self.data[self.selected_variable] >= self.valor]
+                if self.condicion == '<=':
+                    self.data = self.data[self.data[self.selected_variable] <= self.valor]
+            else:
+                if self.condicion == 'Igual':
+                    self.data = self.data[self.data[self.selected_variable] == self.valor]
+                if self.condicion == 'Empieza por':
+                    self.data = self.data[self.data[self.selected_variable].astype(str).str.startswith(self.valor)]
+                if self.condicion == 'Termina en':
+                    self.data = self.data[self.data[self.selected_variable].astype(str).str.endswith(self.valor)]
+                if self.condicion == 'Contiene':
+                    self.data = self.data[self.data[self.selected_variable].astype(str).str.contains(self.valor)]
+        if self.action == 'Seleccionar columnas':
+            self.data = self.data[self.selected_variables]
+
+        if self.action == 'Filtrar dos columnas':
+            if self.tipo_cond == 'Numérico':
+                self.valor = float(self.valor)
+                if self.condicion == '==':
+                    cond1 = self.data[self.selected_variable] == self.valor
+                if self.condicion == '!=':
+                    cond1 = self.data[self.selected_variable] != self.valor
+                if self.condicion == '>':
+                    cond1 = self.data[self.selected_variable] > self.valor
+                if self.condicion == '<':
+                    cond1 = self.data[self.selected_variable] < self.valor
+                if self.condicion == '>=':
+                    cond1 = self.data[self.selected_variable] >= self.valor
+                if self.condicion == '<=':
+                    cond1 = self.data[self.selected_variable] <= self.valor
+            else:
+                if self.condicion == 'Igual':
+                    cond1 = self.data[self.selected_variable] == self.valor
+                if self.condicion == 'Empieza por':
+                    cond1 = self.data[self.selected_variable].astype(str).str.startswith(self.valor)
+                if self.condicion == 'Termina en':
+                    cond1 = self.data[self.selected_variable].astype(str).str.endswith(self.valor)
+                if self.condicion == 'Contiene':
+                    cond1 = self.data[self.selected_variable].astype(str).str.contains(self.valor)
+
+            if self.tipo_cond2 == 'Numérico':
+                self.valor2 = float(self.valor2)
+                if self.condicion2 == '==':
+                    cond2 = self.data[self.selected_variable2] == self.valor2
+                if self.condicion2 == '!=':
+                    cond2 = self.data[self.selected_variable2] != self.valor2
+                if self.condicion2 == '>':
+                    cond2 = self.data[self.selected_variable2] > self.valor2
+                if self.condicion2 == '<':
+                    cond2 = self.data[self.selected_variable2] < self.valor2
+                if self.condicion2 == '>=':
+                    cond2 = self.data[self.selected_variable2] >= self.valor2
+                if self.condicion2 == '<=':
+                    cond2 = self.data[self.selected_variable2] <= self.valor2
+            else:
+                if self.condicion2 == 'Igual':
+                    cond2 = self.data[self.selected_variable2] == self.valor2
+                if self.condicion2 == 'Empieza por':
+                    cond2 = self.data[self.selected_variable2].astype(str).str.startswith(self.valor2)
+                if self.condicion2 == 'Termina en':
+                    cond2 = self.data[self.selected_variable2].astype(str).str.endswith(self.valor2)
+                if self.condicion2 == 'Contiene':
+                    cond2 = self.data[self.selected_variable2].astype(str).str.contains(self.valor2)
+
+            if self.operation == 'AND':
+                self.data = self.data[cond1 & cond2]
+            else:
+                self.data = self.data[cond1 | cond2]
 
 class Exportar:
     def __init__(self, action):
@@ -258,8 +367,6 @@ class Exportar:
     
     def cargar_data(self, data):
         self.data = data
-        print(self.data.head())
-        print('----')
         
     def procesar(self):
         if self.action == self.items[0]:
