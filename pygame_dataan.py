@@ -200,14 +200,20 @@ class PGData:
                                 if modulo.name == gui_manager.selected_model:
                                     for bloque in modulo.data_blocks:
                                         if bloque.rect.collidepoint(position_mouse):
-                                            if not bloque.selected: 
-                                                for bloque_2 in modulo.data_blocks:                                                    
-                                                    bloque_2.selected = False
-                                                bloque.selected = True
+                                            if not bloque.out_elements:
+                                                if not bloque.selected: 
+                                                    for bloque_2 in modulo.data_blocks:                                                    
+                                                        bloque_2.selected = False
+                                                    bloque.selected = True
+                                                else:
+                                                    bloque.selected = False
+                                                gui_manager.properties = False
+                                                gui_manager.check_block(bloque, (ANCHO, ALTO))  
                                             else:
-                                                bloque.selected = False
-                                            gui_manager.properties = False
-                                            gui_manager.check_block(bloque, (ANCHO, ALTO))                                            
+                                                    UIMessageWindow(pygame.Rect((self.WINDOW_SIZE[0]/2-size_alert[0]/2, 
+                                                                                self.WINDOW_SIZE[1]/2-size_alert[1]/2), size_alert),
+                                                                                html_message='El bloque no puede tener elementos conectados a su salida si se desea modificar', window_title='Error', manager=gui_manager.manager)
+                                                    gui_manager.hold_line = False                                          
 
                 if event.type == pygame.USEREVENT: 
                     gui_manager.check_event(event, position_mouse, worker)

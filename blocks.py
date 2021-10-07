@@ -3,6 +3,7 @@ import build_table
 import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
+from sklearn.preprocessing import MinMaxScaler
 
 
 class OwnPipeline():
@@ -17,7 +18,7 @@ class OwnPipeline():
 class Ingesta:
     def __init__(self, action) -> None:
         self.id = 'Ingesta'
-        self.items = ['Fichero', 'SQL', 'URL', 'Data toy', 'Carpeta']
+        self.items = ['Fichero', 'URL', 'Data toy']
         self.action = action
         self.data = pd.DataFrame()
         self.path = ''
@@ -34,16 +35,20 @@ class Ingesta:
             self.path = 'D:\proyectos_git\Auto_EDA\EDA_Tool\data\titanic.csv'
         elif option_path == 'Flores':
             self.path = ''
-        
+        elif option_path == 'Notas':            
+            self.path = 'D:\\proyectos_git\\Auto_EDA\\EDA_Tool\\data\\notas.csv'
+            print(self.path)
+            df = pd.read_csv(self.path)
+            print(df.head())
+
     def procesar(self, **kwargs):
-        if self.action == self.items[0] or self.action == self.items[2]:
-            try:
-                print(self.sep)
-                self.data = pd.read_csv(self.path, sep=self.sep)
-                print(self.data)
-            except:
-                self.error = True
-                self.msg = 'El archivo no existe o es inválido'
+        try:
+            print(self.sep)
+            self.data = pd.read_csv(self.path, sep=self.sep)
+            print(self.data)
+        except:
+            self.error = True
+            self.msg = 'El archivo no existe o es inválido'
 
 class Limpieza:
     def __init__(self, action) -> None:
@@ -64,7 +69,9 @@ class Limpieza:
         self.value = None
         self.index = None
         self.old_value = None  # Valor a reemplazar
-        self.error = False
+        self.error = True
+        self.msg = 'El bloque de limpieza no puede ser procesado'
+        self.valide_data = False
     
     def cargar_data(self, data):
         self.data = data
@@ -76,8 +83,10 @@ class Limpieza:
         if self.action == 'Eliminar Nan':
             if self.axis == 2:
                 self.data = self.data.dropna(how=self.how, axis=0, thresh=self.thresh, subset=self.selected_columns)
+                self.error = False
             else:
                 self.data = self.data.dropna(how=self.how, axis=self.axis, thresh=self.thresh)
+                self.error = False
         if self.action == 'Eliminar columnas':
             self.data = self.data.drop(self.selected_columns, axis=self.axis)
         if self.action == 'Renombrar columnas':
@@ -126,6 +135,8 @@ class Explorar:
         self.agg = None
         self.selected_column = None
         self.error = False
+        self.error = True  # Evita que el bloque pueda ser procesado si existe algun error
+        self.msg = 'El bloque de exploración no puede ser procesado'
     
     def cargar_data(self, data):
         self.data = data
@@ -185,6 +196,8 @@ class Analisis:
         self.atributo = None
         self.columnas = []
         self.error = False
+        self.error = True  # Evita que el bloque pueda ser procesado si existe algun error
+        self.msg = 'El bloque de análisis no puede ser procesado'
     
     def cargar_data(self, data):
         self.data = data
@@ -205,12 +218,16 @@ class Analisis:
         if self.action == 'Análisis bivariante':
             sns.set_theme()
             if self.kind == 'Relación':
-                sns.jointplot(x=self.ejex, y=self.ejey, data=self.data)
+                sns.jointplot(x=self.ejex, y=self.ejey, data=self.data, kind="reg", line_kws={'color':'green'},
+                 scatter_kws={'alpha': 0.33})
             elif self.kind == 'Regresión':
                 sns.lmplot(x=self.ejex, y=self.ejey, data=self.data)
             elif self.kind == 'Conteo':
                 sns.countplot(x=self.ejex, hue=self.ejey, data=self.data)
-            
+            elif self.kind == 'Barras':
+                sns.barplot(x=self.ejex, y=self.ejey, data=self.data) 
+            elif self.kind == 'Cajas':
+                sns.boxplot(x=self.ejex, y=self.ejey, data=self.data)            
             plt.show()
 
         if self.action == 'Análisis multivariante':
@@ -240,6 +257,11 @@ class Transformacion:
         self.tipo_cond = None
         self.tipo_cond2 = None
         self.selected_variables = []
+        self.maximo = None
+        self.maximo = None
+        self.aleatorio = True
+        self.error = True  # Evita que el bloque pueda ser procesado si existe algun error
+        self.msg = 'El bloque de transformación no puede ser procesado'
 
     def cargar_data(self, data):
         self.data = data
@@ -248,113 +270,130 @@ class Transformacion:
         self.data2 = data2
 
     def procesar(self):
-        if self.action == 'Unir':
-            pass
-        if self.action == 'Operar dos columnas':
-            if self.operation == 'Sumar':
-                funco = lambda x: x[0] + x[1]
-            elif self.operation == 'Restar':
-                funco = lambda x: x[0] - x[1]
-            elif self.operation == 'Multiplicar':
-                funco = lambda x: x[0] * x[1]
-            elif self.operation == 'Dividir':
-                funco = lambda x: x[0] / x[1]
-            self.data[self.new_variable] = self.data[[self.selected_variable, self.selected_variable2]].apply(funco, axis=1)
+        try:
+            if self.action == 'Unir':
+                pass
+            if self.action == 'Operar dos columnas':
+                if self.operation == 'Sumar':
+                    funco = lambda x: x[0] + x[1]
+                elif self.operation == 'Restar':
+                    funco = lambda x: x[0] - x[1]
+                elif self.operation == 'Multiplicar':
+                    funco = lambda x: x[0] * x[1]
+                elif self.operation == 'Dividir':
+                    funco = lambda x: x[0] / x[1]
+                self.data[self.new_variable] = self.data[[self.selected_variable, self.selected_variable2]].apply(funco, axis=1)
 
-        if self.action == 'Operar una columna':
-            self.valor = float(self.valor)
-            if self.operation == 'Sumar':
-                funco = lambda x: x + self.valor
-            elif self.operation == 'Restar':
-                funco = lambda x: x - self.valor
-            elif self.operation == 'Multiplicar':
-                funco = lambda x: x * self.valor
-            elif self.operation == 'Dividir':
-                funco = lambda x: x / self.valor
-            elif self.operation == 'Elevar':
-                funco = lambda x: x ** self.valor
-            self.data[self.new_variable] = self.data[self.selected_variable].apply(funco)
-
-        if self.action == 'Filtrar una columna':
-            if self.tipo_cond == 'Numérico':
+            if self.action == 'Operar una columna':
                 self.valor = float(self.valor)
-                if self.condicion == '==':
-                    self.data = self.data[self.data[self.selected_variable] == self.valor]
-                if self.condicion == '!=':
-                    self.data = self.data[self.data[self.selected_variable] != self.valor]
-                if self.condicion == '>':
-                    self.data = self.data[self.data[self.selected_variable] > self.valor]
-                if self.condicion == '<':
-                    self.data = self.data[self.data[self.selected_variable] < self.valor]
-                if self.condicion == '>=':
-                    self.data = self.data[self.data[self.selected_variable] >= self.valor]
-                if self.condicion == '<=':
-                    self.data = self.data[self.data[self.selected_variable] <= self.valor]
-            else:
-                if self.condicion == 'Igual':
-                    self.data = self.data[self.data[self.selected_variable] == self.valor]
-                if self.condicion == 'Empieza por':
-                    self.data = self.data[self.data[self.selected_variable].astype(str).str.startswith(self.valor)]
-                if self.condicion == 'Termina en':
-                    self.data = self.data[self.data[self.selected_variable].astype(str).str.endswith(self.valor)]
-                if self.condicion == 'Contiene':
-                    self.data = self.data[self.data[self.selected_variable].astype(str).str.contains(self.valor)]
-        if self.action == 'Seleccionar columnas':
-            self.data = self.data[self.selected_variables]
+                if self.operation == 'Sumar':
+                    funco = lambda x: x + self.valor
+                elif self.operation == 'Restar':
+                    funco = lambda x: x - self.valor
+                elif self.operation == 'Multiplicar':
+                    funco = lambda x: x * self.valor
+                elif self.operation == 'Dividir':
+                    funco = lambda x: x / self.valor
+                elif self.operation == 'Elevar':
+                    funco = lambda x: x ** self.valor
+                self.data[self.new_variable] = self.data[self.selected_variable].apply(funco)
 
-        if self.action == 'Filtrar dos columnas':
-            if self.tipo_cond == 'Numérico':
-                self.valor = float(self.valor)
-                if self.condicion == '==':
-                    cond1 = self.data[self.selected_variable] == self.valor
-                if self.condicion == '!=':
-                    cond1 = self.data[self.selected_variable] != self.valor
-                if self.condicion == '>':
-                    cond1 = self.data[self.selected_variable] > self.valor
-                if self.condicion == '<':
-                    cond1 = self.data[self.selected_variable] < self.valor
-                if self.condicion == '>=':
-                    cond1 = self.data[self.selected_variable] >= self.valor
-                if self.condicion == '<=':
-                    cond1 = self.data[self.selected_variable] <= self.valor
-            else:
-                if self.condicion == 'Igual':
-                    cond1 = self.data[self.selected_variable] == self.valor
-                if self.condicion == 'Empieza por':
-                    cond1 = self.data[self.selected_variable].astype(str).str.startswith(self.valor)
-                if self.condicion == 'Termina en':
-                    cond1 = self.data[self.selected_variable].astype(str).str.endswith(self.valor)
-                if self.condicion == 'Contiene':
-                    cond1 = self.data[self.selected_variable].astype(str).str.contains(self.valor)
+            if self.action == 'Filtrar una columna':
+                if self.tipo_cond == 'Numérico':
+                    self.valor = float(self.valor)
+                    if self.condicion == '==':
+                        self.data = self.data[self.data[self.selected_variable] == self.valor]
+                    if self.condicion == '!=':
+                        self.data = self.data[self.data[self.selected_variable] != self.valor]
+                    if self.condicion == '>':
+                        self.data = self.data[self.data[self.selected_variable] > self.valor]
+                    if self.condicion == '<':
+                        self.data = self.data[self.data[self.selected_variable] < self.valor]
+                    if self.condicion == '>=':
+                        self.data = self.data[self.data[self.selected_variable] >= self.valor]
+                    if self.condicion == '<=':
+                        self.data = self.data[self.data[self.selected_variable] <= self.valor]
+                else:
+                    if self.condicion == 'Igual':
+                        self.data = self.data[self.data[self.selected_variable] == self.valor]
+                    if self.condicion == 'Empieza por':
+                        self.data = self.data[self.data[self.selected_variable].astype(str).str.startswith(self.valor)]
+                    if self.condicion == 'Termina en':
+                        self.data = self.data[self.data[self.selected_variable].astype(str).str.endswith(self.valor)]
+                    if self.condicion == 'Contiene':
+                        self.data = self.data[self.data[self.selected_variable].astype(str).str.contains(self.valor)]
+            if self.action == 'Seleccionar columnas':
+                self.data = self.data[self.selected_variables]
+            if self.action == 'Normalizar':
+                scaler = MinMaxScaler(feature_range=(float(self.minimo), float(self.maximo)))
+                self.data[self.selected_variables] = scaler.fit_transform(self.data[self.selected_variables])
+            if self.action == 'Ordenar':
+                orden = False
+                if self.tipo_cond == 'Ascendente':
+                    orden = True
+                self.data = self.data.sort_values(by=[self.selected_variable], ascending=orden)
+            if self.action == 'Muestra':
+                if self.aleatorio == 'Sí':
+                    self.data = self.data.sample(frac=float(self.valor))
+                else:
+                    self.data = self.data.sample(frac=float(self.valor), random_state=1)
+                
+            if self.action == 'Filtrar dos columnas':
+                if self.tipo_cond == 'Numérico':
+                    self.valor = float(self.valor)
+                    if self.condicion == '==':
+                        cond1 = self.data[self.selected_variable] == self.valor
+                    if self.condicion == '!=':
+                        cond1 = self.data[self.selected_variable] != self.valor
+                    if self.condicion == '>':
+                        cond1 = self.data[self.selected_variable] > self.valor
+                    if self.condicion == '<':
+                        cond1 = self.data[self.selected_variable] < self.valor
+                    if self.condicion == '>=':
+                        cond1 = self.data[self.selected_variable] >= self.valor
+                    if self.condicion == '<=':
+                        cond1 = self.data[self.selected_variable] <= self.valor
+                else:
+                    if self.condicion == 'Igual':
+                        cond1 = self.data[self.selected_variable] == self.valor
+                    if self.condicion == 'Empieza por':
+                        cond1 = self.data[self.selected_variable].astype(str).str.startswith(self.valor)
+                    if self.condicion == 'Termina en':
+                        cond1 = self.data[self.selected_variable].astype(str).str.endswith(self.valor)
+                    if self.condicion == 'Contiene':
+                        cond1 = self.data[self.selected_variable].astype(str).str.contains(self.valor)
 
-            if self.tipo_cond2 == 'Numérico':
-                self.valor2 = float(self.valor2)
-                if self.condicion2 == '==':
-                    cond2 = self.data[self.selected_variable2] == self.valor2
-                if self.condicion2 == '!=':
-                    cond2 = self.data[self.selected_variable2] != self.valor2
-                if self.condicion2 == '>':
-                    cond2 = self.data[self.selected_variable2] > self.valor2
-                if self.condicion2 == '<':
-                    cond2 = self.data[self.selected_variable2] < self.valor2
-                if self.condicion2 == '>=':
-                    cond2 = self.data[self.selected_variable2] >= self.valor2
-                if self.condicion2 == '<=':
-                    cond2 = self.data[self.selected_variable2] <= self.valor2
-            else:
-                if self.condicion2 == 'Igual':
-                    cond2 = self.data[self.selected_variable2] == self.valor2
-                if self.condicion2 == 'Empieza por':
-                    cond2 = self.data[self.selected_variable2].astype(str).str.startswith(self.valor2)
-                if self.condicion2 == 'Termina en':
-                    cond2 = self.data[self.selected_variable2].astype(str).str.endswith(self.valor2)
-                if self.condicion2 == 'Contiene':
-                    cond2 = self.data[self.selected_variable2].astype(str).str.contains(self.valor2)
+                if self.tipo_cond2 == 'Numérico':
+                    self.valor2 = float(self.valor2)
+                    if self.condicion2 == '==':
+                        cond2 = self.data[self.selected_variable2] == self.valor2
+                    if self.condicion2 == '!=':
+                        cond2 = self.data[self.selected_variable2] != self.valor2
+                    if self.condicion2 == '>':
+                        cond2 = self.data[self.selected_variable2] > self.valor2
+                    if self.condicion2 == '<':
+                        cond2 = self.data[self.selected_variable2] < self.valor2
+                    if self.condicion2 == '>=':
+                        cond2 = self.data[self.selected_variable2] >= self.valor2
+                    if self.condicion2 == '<=':
+                        cond2 = self.data[self.selected_variable2] <= self.valor2
+                else:
+                    if self.condicion2 == 'Igual':
+                        cond2 = self.data[self.selected_variable2] == self.valor2
+                    if self.condicion2 == 'Empieza por':
+                        cond2 = self.data[self.selected_variable2].astype(str).str.startswith(self.valor2)
+                    if self.condicion2 == 'Termina en':
+                        cond2 = self.data[self.selected_variable2].astype(str).str.endswith(self.valor2)
+                    if self.condicion2 == 'Contiene':
+                        cond2 = self.data[self.selected_variable2].astype(str).str.contains(self.valor2)
 
-            if self.operation == 'AND':
-                self.data = self.data[cond1 & cond2]
-            else:
-                self.data = self.data[cond1 | cond2]
+                if self.operation == 'AND':
+                    self.data = self.data[cond1 & cond2]
+                else:
+                    self.data = self.data[cond1 | cond2]
+        except:
+            print('excpeción')
+            self.msg = 'dsasdas'
 
 class Exportar:
     def __init__(self, action):
@@ -363,7 +402,8 @@ class Exportar:
         self.action = action
         self.path = ''
         self.nombre = ''
-        self.error = False
+        self.error = True  # Evita que el bloque pueda ser procesado si existe algun error
+        self.msg = 'El bloque de exportación no puede ser procesado'
     
     def cargar_data(self, data):
         self.data = data

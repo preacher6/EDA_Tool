@@ -45,7 +45,7 @@ class MyApp(Frame):
         Frame.__init__(self)
         self.main = self.master
         self.main.geometry('400x300')
-        self.main.title('Tanla')
+        self.main.title('Tabla')
         f = Frame(self.main)
         f.pack(fill=BOTH,expand=1)
         make_table(f, data) 

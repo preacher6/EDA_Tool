@@ -129,7 +129,6 @@ class ProperToy(UIWindow):
                          object_id='#proper_toy',
                          resizable=True)
 
-        loaded_test_image = pygame.image.load('data/images/splat.bmp').convert_alpha()
         top_margin = 2
         top_left = 10
         self.entry_text =  UITextEntryLine(pygame.Rect((70, top_margin), (120, 20)),
@@ -143,16 +142,18 @@ class ProperToy(UIWindow):
                                                 manager=ui_manager,
                                                 container=self,
                                                 parent_element=self)
-        # self.rename = UIButton(relative_rect=pygame.Rect((top_left, 50), (35, 35)),
-        #                                     text='',
-        #                                     manager=ui_manager,
-        #                                     container=self,
-        #                                     object_id='#folder')
-        elementos = ['Titanic', 'Flores']
+        
+        self.search_label = UILabel(pygame.Rect((5, 35),
+                                                (150, self.entry_text.rect.height)),
+                                                    "Conjunto de datos:",
+                                                manager=ui_manager,
+                                                container=self,
+                                                parent_element=self)
+        elementos = ['Notas']
         self.elementos = UIDropDownMenu(elementos,
                                       elementos[0],
-                                    pygame.Rect((top_left+180, 35),
-                                                (190, 30)),
+                                    pygame.Rect((top_left+150, 35),
+                                                (100, 30)),
                                     ui_manager,
                                     container=self)
 
@@ -757,49 +758,6 @@ class ProperSetIndex(UIWindow):
 
 
 
-
-class ProperSave(UIWindow):
-    def __init__(self, rect, ui_manager):
-        super().__init__(rect, ui_manager,
-                         window_display_title='Propiedades',
-                         object_id='#proper_save',
-                         resizable=True)
-
-        loaded_test_image = pygame.image.load('data/images/splat.bmp').convert_alpha()
-        top_margin = 2
-        top_left = 10
-        self.entry_text =  UITextEntryLine(pygame.Rect((70, top_margin), (120, 20)),
-                                            manager=ui_manager,
-                                            container=self,
-                                            parent_element=self)
-        
-        self.search_label = UILabel(pygame.Rect((10, top_margin),
-                                                (56, self.entry_text.rect.height)),
-                                                    "Nombre:",
-                                                manager=ui_manager,
-                                                container=self,
-                                                parent_element=self)
-        self.rename = UIButton(relative_rect=pygame.Rect((top_left, 50), (35, 35)),
-                                            text='',
-                                            manager=ui_manager,
-                                            container=self,
-                                            object_id='#folder')
-        self.path_label = UITextEntryLine(pygame.Rect((50, 50),
-                                                (340, self.entry_text.rect.height)),
-                                                manager=ui_manager,
-                                                container=self,
-                                                parent_element=self,
-                                                object_id='pathdir')
-        
-        self.aceptar = UIButton(relative_rect=pygame.Rect((top_left+120, 100), (90, 35)),
-                                            text='Aceptar',
-                                            manager=ui_manager,
-                                            container=self,
-                                            object_id='#aceptar')
-        self.path_label.disable()
-        self.set_blocking(True)
-        
-
 ####### ANÁLISIS
 
 class ProperAnaUni(UIWindow):
@@ -911,7 +869,7 @@ class ProperAnaBi(UIWindow):
                                                 (140, 30)),
                                     ui_manager,
                                     container=self)
-        tipo_grafico = ['Relación', 'Regresión', 'Conteo']
+        tipo_grafico = ['Relación', 'Regresión', 'Conteo', 'Barras', 'Cajas']
         self.tipo = UILabel(pygame.Rect((10, top_margin+120),
                                                 (140, self.entry_text.rect.height)),
                                                     "Tipo de gráfico:",
@@ -1255,23 +1213,23 @@ class ProperFilterOne(UIWindow):
                                                 container=self,
                                                 parent_element=self)
 
-        self.condicion_op = UISelectionList(pygame.Rect(155, top_margin+115, 70, 80),
+        self.condicion_op = UISelectionList(pygame.Rect(155, top_margin+115, 120, 80),
                                     item_list=['==', '!=', '>', '<', '>=', '<='],
                                     manager=ui_manager,
                                     container=self)                
-        self.label_valor = UILabel(pygame.Rect((230, top_margin+115),
+        self.label_valor = UILabel(pygame.Rect((230+45, top_margin+115),
                                                 (70, self.entry_text.rect.height)),
                                                     "Valor:",
                                                 manager=ui_manager,
                                                 container=self,
                                                 parent_element=self)
 
-        self.valor =  UITextEntryLine(pygame.Rect((290, top_margin+115), (70, 20)),
+        self.valor =  UITextEntryLine(pygame.Rect((290+45, top_margin+115), (70, 20)),
                                             manager=ui_manager,
                                             container=self,
                                             parent_element=self)
         
-        self.aceptar = UIButton(relative_rect=pygame.Rect((top_left+120, 200), (90, 35)),
+        self.aceptar = UIButton(relative_rect=pygame.Rect((top_left+120+30, 200), (90, 35)),
                                             text='Aceptar',
                                             manager=ui_manager,
                                             container=self,
@@ -1334,7 +1292,7 @@ class ProperFilterTwo(UIWindow):
                                                 container=self,
                                                 parent_element=self)
 
-        self.condicion_op1 = UISelectionList(pygame.Rect(155, top_margin+115, 70, 80),
+        self.condicion_op1 = UISelectionList(pygame.Rect(155, top_margin+115, 120, 80),
                                     item_list=['==', '!=', '>', '<', '>=', '<='],
                                     manager=ui_manager,
                                     container=self)                
@@ -1352,7 +1310,7 @@ class ProperFilterTwo(UIWindow):
                                                 parent_element=self)
 
         #####
-        self.var2 = UILabel(pygame.Rect((250+5, top_margin+35),
+        self.var2 = UILabel(pygame.Rect((250+5+20, top_margin+35),
                                                 (100, self.entry_text.rect.height)),
                                                     "Variable 2:",
                                                 manager=ui_manager,
@@ -1360,12 +1318,12 @@ class ProperFilterTwo(UIWindow):
                                                 parent_element=self)
         self.variable2 = UIDropDownMenu(bloque.bloque.data.columns,
                                     bloque.bloque.data.columns[0],
-                                    pygame.Rect((250+100, top_margin+35),
+                                    pygame.Rect((250+100+20, top_margin+35),
                                                 (150, 30)),
                                     ui_manager,
                                     container=self)
 
-        self.tipo_label2 = UILabel(pygame.Rect((250+10, top_margin+75),
+        self.tipo_label2 = UILabel(pygame.Rect((250+10+20, top_margin+75),
                                                 (140, self.entry_text.rect.height)),
                                                     "Tipo de variable:",
                                                 manager=ui_manager,
@@ -1373,37 +1331,37 @@ class ProperFilterTwo(UIWindow):
                                                 parent_element=self)
         self.tipo_data2 =  UIDropDownMenu(['Numérico', 'Texto'],
                                         'Numérico',
-                                            pygame.Rect((250+150, top_margin+75),
+                                            pygame.Rect((250+150+20, top_margin+75),
                                                         (100, 30)),
                                             ui_manager,
                                             container=self,
                                             object_id='#data2')
 
-        self.label_data2 = UILabel(pygame.Rect((250+10, top_margin+115),
+        self.label_data2 = UILabel(pygame.Rect((250+30, top_margin+115),
                                                 (145, self.entry_text.rect.height)),
                                                     "Tipo de condición:",
                                                 manager=ui_manager,
                                                 container=self,
                                                 parent_element=self)
 
-        self.condicion_op2 = UISelectionList(pygame.Rect(250+155, top_margin+115, 70, 80),
+        self.condicion_op2 = UISelectionList(pygame.Rect(250+175, top_margin+115, 120, 80),
                                     item_list=['==', '!=', '>', '<', '>=', '<='],
                                     manager=ui_manager,
                                     container=self)                
         
-        self.valor2 =  UITextEntryLine(pygame.Rect((250+65, top_margin+155), (70, 20)),
+        self.valor2 =  UITextEntryLine(pygame.Rect((250+85, top_margin+155), (70, 20)),
                                             manager=ui_manager,
                                             container=self,
                                             parent_element=self)
         
-        self.label_valor2 = UILabel(pygame.Rect((250+5, top_margin+155),
+        self.label_valor2 = UILabel(pygame.Rect((250+25, top_margin+155),
                                                 (60, self.entry_text.rect.height)),
                                                     "Valor:",
                                                 manager=ui_manager,
                                                 container=self,
                                                 parent_element=self)
 
-        self.tipo_label = UILabel(pygame.Rect((10, top_margin+155+50),
+        self.tipo_label = UILabel(pygame.Rect((100, top_margin+155+50),
                                                 (140, self.entry_text.rect.height)),
                                                     "Operación lógica:",
                                                 manager=ui_manager,
@@ -1411,21 +1369,20 @@ class ProperFilterTwo(UIWindow):
                                                 parent_element=self)
         self.operacion = UIDropDownMenu(['AND', 'OR'],
                                         'AND',
-                                            pygame.Rect((150, top_margin+155+50),
+                                            pygame.Rect((240, top_margin+155+50),
                                                         (100, 30)),
                                             ui_manager,
                                             container=self)
 
         
         
-        self.aceptar = UIButton(relative_rect=pygame.Rect((top_left+120+60, 200+50), (90, 35)),
+        self.aceptar = UIButton(relative_rect=pygame.Rect((top_left+120+120, 200+50), (90, 35)),
                                             text='Aceptar',
                                             manager=ui_manager,
                                             container=self,
                                             object_id='#aceptar')
         
         self.set_blocking(True)
-
 
 
 class ProperSelectColumns(UIWindow):
@@ -1468,6 +1425,196 @@ class ProperSelectColumns(UIWindow):
                                             manager=ui_manager,
                                             container=self,
                                             object_id='#aceptar')
+        self.set_blocking(True)
+
+
+class ProperOrdenar(UIWindow):
+    def __init__(self, rect, ui_manager, bloque):
+        super().__init__(rect, ui_manager,
+                         window_display_title='Propiedades',
+                         object_id='#proper_ordenar',
+                         resizable=True)
+        top_margin = 2
+        top_left = 10
+        
+        self.entry_text =  UITextEntryLine(pygame.Rect((70, top_margin), (120, 20)),
+                                            manager=ui_manager,
+                                            container=self,
+                                            parent_element=self)
+        
+        self.search_label = UILabel(pygame.Rect((10, top_margin),
+                                                (56, self.entry_text.rect.height)),
+                                                    "Nombre:",
+                                                manager=ui_manager,
+                                                container=self,
+                                                parent_element=self)
+        self.union_name = UILabel(pygame.Rect((10, top_margin+35),
+                                                (80, self.entry_text.rect.height)),
+                                                    "Variable:",
+                                                manager=ui_manager,
+                                                container=self,
+                                                parent_element=self)
+        self.variable = UIDropDownMenu(bloque.bloque.data.columns,
+                                    bloque.bloque.data.columns[0],
+                                    pygame.Rect((90, top_margin+35),
+                                                (150, 30)),
+                                    ui_manager,
+                                    container=self)
+        self.tipo_orden =  UIDropDownMenu(['Ascendente', 'Descendente'],
+                                        'Ascendente',
+                                            pygame.Rect((150, top_margin+75),
+                                                        (100, 30)),
+                                            ui_manager,
+                                            container=self,
+                                            object_id='#data')
+
+        self.label_orden = UILabel(pygame.Rect((10, top_margin+115),
+                                                (145, self.entry_text.rect.height)),
+                                                    "Tipo de orden:",
+                                                manager=ui_manager,
+                                                container=self,
+                                                parent_element=self)
+        
+        self.aceptar = UIButton(relative_rect=pygame.Rect((top_left+120, 200), (90, 35)),
+                                            text='Aceptar',
+                                            manager=ui_manager,
+                                            container=self,
+                                            object_id='#aceptar')
+        self.set_blocking(True)
+
+
+class ProperNormColumns(UIWindow):
+    def __init__(self, rect, ui_manager, bloque):
+        super().__init__(rect, ui_manager,
+                         window_display_title='Propiedades',
+                         object_id='#proper_normcols',
+                         resizable=True)
+        top_margin = 2
+        top_left = 10
+        
+        self.entry_text =  UITextEntryLine(pygame.Rect((70, top_margin), (120, 20)),
+                                            manager=ui_manager,
+                                            container=self,
+                                            parent_element=self)
+        
+        self.search_label = UILabel(pygame.Rect((10, top_margin),
+                                                (56, self.entry_text.rect.height)),
+                                                    "Nombre:",
+                                                manager=ui_manager,
+                                                container=self,
+                                                parent_element=self)
+
+        self.var1 = UILabel(pygame.Rect((10, top_margin+35),
+                                                (100, self.entry_text.rect.height)),
+                                                    "Variables:",
+                                                manager=ui_manager,
+                                                container=self,
+                                                parent_element=self)
+
+        self.lista_columnas = UISelectionList(pygame.Rect(top_left+110, top_margin+35, 170, 120),
+                                    item_list=bloque.bloque.data.columns,
+                                    manager=ui_manager,
+                                    container=self,
+                                    allow_multi_select=True,
+                                    object_id='#columnas')    
+
+        self.minimo =  UITextEntryLine(pygame.Rect((75, top_margin+160), (60, 20)),
+                                            manager=ui_manager,
+                                            container=self,
+                                            parent_element=self)
+        
+        self.label_min = UILabel(pygame.Rect((5, top_margin+160),
+                                                (70, self.entry_text.rect.height)),
+                                                    "Mínimo:",
+                                                manager=ui_manager,
+                                                container=self,
+                                                parent_element=self)  
+
+        self.maximo =  UITextEntryLine(pygame.Rect((215, top_margin+160), (60, 20)),
+                                            manager=ui_manager,
+                                            container=self,
+                                            parent_element=self)
+        
+        self.label_max = UILabel(pygame.Rect((140, top_margin+160),
+                                                (70, self.entry_text.rect.height)),
+                                                    "Máximo:",
+                                                manager=ui_manager,
+                                                container=self,
+                                                parent_element=self)     
+
+        self.aceptar = UIButton(relative_rect=pygame.Rect((top_left+120, 200), (90, 35)),
+                                            text='Aceptar',
+                                            manager=ui_manager,
+                                            container=self,
+                                            object_id='#aceptar')
+        self.set_blocking(True)
+
+
+class ProperMuestra(UIWindow):
+    """Clase para muestrear datos
+    Args:
+        UIWindow ([type]): [description]
+    """
+    def __init__(self, rect, ui_manager, bloque):
+        super().__init__(rect, ui_manager,
+                         window_display_title='Propiedades',
+                         object_id='#proper_muestra',
+                         resizable=True)
+        top_margin = 2
+        top_left = 10
+        
+        self.entry_text =  UITextEntryLine(pygame.Rect((70, top_margin), (120, 20)),
+                                            manager=ui_manager,
+                                            container=self,
+                                            parent_element=self)
+        
+        self.search_label = UILabel(pygame.Rect((10, top_margin),
+                                                (56, self.entry_text.rect.height)),
+                                                    "Nombre:",
+                                                manager=ui_manager,
+                                                container=self,
+                                                parent_element=self)
+
+        aleatorio = ['Sí', 'No']
+        self.aleatorio_estado = UIDropDownMenu(aleatorio,
+                                      aleatorio[0],
+                                    pygame.Rect((top_left+140, 40),
+                                                (70, 30)),
+                                    ui_manager,
+                                    container=self)
+
+        self.eti_valor = UILabel(pygame.Rect((10, 40),
+                                                (140, self.entry_text.rect.height)),
+                                                    "Estado aleatorio:",
+                                                manager=ui_manager,
+                                                container=self,
+                                                parent_element=self) 
+        
+        self.eti_porc = UILabel(pygame.Rect((10, top_margin+80),
+                                                (90, self.entry_text.rect.height)),
+                                                    "Porcentaje:",
+                                                manager=ui_manager,
+                                                container=self,
+                                                parent_element=self) 
+
+        self.entry_porc =  UITextEntryLine(pygame.Rect((100, top_margin+80), (50, 20)),
+                                            manager=ui_manager,
+                                            container=self,
+                                            parent_element=self)
+
+        self.eti_valor = UILabel(pygame.Rect((155, top_margin+80),
+                                                (45, self.entry_text.rect.height)),
+                                                    "[0-1]",
+                                                manager=ui_manager,
+                                                container=self,
+                                                parent_element=self) 
+                
+        self.aceptar = UIButton(relative_rect=pygame.Rect((top_left+90, 140), (90, 35)),
+                                            text='Aceptar',
+                                            manager=ui_manager,
+                                            container=self,
+                                            object_id='#aceptar')
+        
         self.set_blocking(True)
 
 ### EXPORTAR
@@ -1514,3 +1661,47 @@ class ProperSave(UIWindow):
         self.path_label.disable()
         self.set_blocking(True)
 
+
+
+
+class ProperSave(UIWindow):
+    def __init__(self, rect, ui_manager):
+        super().__init__(rect, ui_manager,
+                         window_display_title='Propiedades',
+                         object_id='#proper_save',
+                         resizable=True)
+
+        loaded_test_image = pygame.image.load('data/images/splat.bmp').convert_alpha()
+        top_margin = 2
+        top_left = 10
+        self.entry_text =  UITextEntryLine(pygame.Rect((70, top_margin), (120, 20)),
+                                            manager=ui_manager,
+                                            container=self,
+                                            parent_element=self)
+        
+        self.search_label = UILabel(pygame.Rect((10, top_margin),
+                                                (56, self.entry_text.rect.height)),
+                                                    "Nombre:",
+                                                manager=ui_manager,
+                                                container=self,
+                                                parent_element=self)
+        self.rename = UIButton(relative_rect=pygame.Rect((top_left, 50), (35, 35)),
+                                            text='',
+                                            manager=ui_manager,
+                                            container=self,
+                                            object_id='#folder')
+        self.path_label = UITextEntryLine(pygame.Rect((50, 50),
+                                                (340, self.entry_text.rect.height)),
+                                                manager=ui_manager,
+                                                container=self,
+                                                parent_element=self,
+                                                object_id='pathdir')
+        
+        self.aceptar = UIButton(relative_rect=pygame.Rect((top_left+120, 100), (90, 35)),
+                                            text='Aceptar',
+                                            manager=ui_manager,
+                                            container=self,
+                                            object_id='#aceptar')
+        self.path_label.disable()
+        self.set_blocking(True)
+        

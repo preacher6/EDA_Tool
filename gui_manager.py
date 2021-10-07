@@ -2,6 +2,7 @@ import pygame
 import sys
 import os
 import pygame_gui
+import pandas as pd
 from pygame_gui import UIManager, PackageResource
 from pygame_gui.elements import UIWindow
 from pygame_gui.elements import UIButton
@@ -64,17 +65,17 @@ class GuiManager:
                                             ])
         self.SIZE_WORKSPACE = workspace_size  # Tamaño del espacio de trabajo        
         self.items_choose = ['Ingesta', 'Exploración', 'Limpieza', 'Análisis', 'Transformación', 'Exportar']        
-        self.ing_datos = ['Fichero', 'SQL', 'URL', 'Data toy', 'Carpeta', 'Temporal']
+        self.ing_datos = ['Fichero', 'URL', 'Data toy', 'Temporal']
         self.explor_datos = ['Tabla', 'Descripción', 'Tabla dinámica', 'Tipos de datos', 'Diagrama de barras',
                              'Cabecera', 'Cola', 'Elementos únicos']
         self.limp_datos = ['Eliminar Nan', 'Reemplazar Nan', 'Eliminar columnas', 'Eliminar filas',
                             'Renombrar columnas', 'Reemplazar valor', 'Cambiar indice',
                             'Convertir a fecha', 'Convertir a número', 'Convertir a categoría']
         self.anali_datos = ['Análisis univariante', 'Análisis bivariante',
-                            'Análisis multivariante', 'Correlación']
+                            'Análisis multivariante']
         self.transf_data = ['Crear columna', 'Operar una columna', 'Operar dos columnas', 'Unir',
                              'Agrupar', 'Filtrar una columna', 'Filtrar dos columnas', 'Seleccionar columnas', 'Ordenar', 'Particionar',
-                            'Normalizar', 'Estandarizar', 'Muestra', 'Remodelar']
+                            'Normalizar', 'Muestra']
         self.expor_datos = ['CSV', 'Temporal']
         self.selected_type = self.items_choose[0]
         self.selected_item = 'database'
@@ -93,6 +94,8 @@ class GuiManager:
         self.panel_proper = None  # Panel de propiedades del bloque elegido
         self.del_line = False  # Borrar líneas
         self.delete_line = pygame.image.load(os.path.join('pics', 'icons', 'erase.png'))
+        self.delete_line_rect = self.delete_line.get_rect()
+        self.borrar = False
         self.init_elements()
 
     def init_elements(self):
@@ -242,6 +245,7 @@ class GuiManager:
                 self.bloque.selected = False
                 option_path = self.panel_proper.elementos.selected_option
                 self.bloque.bloque.define_path(option_path)
+                print(option_path)
                 self.panel_proper.kill()
                 self.selected_type = self.items_choose[0]
                 self.reasign1(self.ing_datos)
@@ -251,11 +255,14 @@ class GuiManager:
 
             ##---- Limpieza
             if event.ui_object_id == '#proper_del_col.#aceptar':
-                self.bloque.status = False                
+                self.bloque.status = False
+                self.selected_type = self.items_choose[2]   
+                self.reasign1(self.limp_datos)       
                 self.bloque.bloque.selected_columns = self.panel_proper.lista_columnas.get_multi_selection()
                 self.panel_proper.kill()
             if event.ui_object_id == '#proper_dropnan.#aceptar':
                 self.bloque.status = False
+                self.reasign1(self.limp_datos)   
                 self.bloque.bloque.axis = 0 if self.panel_proper.eje.selected_option == 'Fila' else 1 \
                                          if self.panel_proper.eje.selected_option == 'Columna' else 2
                 self.bloque.bloque.thresh = 1 if self.panel_proper.eje.selected_option == 'Valor' else None
@@ -264,36 +271,34 @@ class GuiManager:
                 self.panel_proper.kill()
             if event.ui_object_id == '#proper_ren_col.#aceptar':
                 self.bloque.status = False
+                self.selected_type = self.items_choose[2]    
                 viejos = self.panel_proper.lista_columnas.get_multi_selection()
                 nuevos = self.panel_proper.new_name.text
                 self.bloque.bloque.new_names(nuevos, viejos)
                 self.panel_proper.kill()
             if event.ui_object_id == '#proper_turn_date.#aceptar':
                 self.bloque.status = False
+                self.selected_type = self.items_choose[2]    
                 self.bloque.bloque.elementos_fecha = self.panel_proper.lista_columnas.get_multi_selection()
                 self.panel_proper.kill()
             if event.ui_object_id == '#proper_turn_num.#aceptar':
                 self.bloque.status = False
+                self.selected_type = self.items_choose[2]    
                 self.bloque.bloque.selected_columns = self.panel_proper.lista_columnas.get_multi_selection()
                 self.panel_proper.kill()
             if event.ui_object_id == '#proper_turn_cat.#aceptar':
                 self.bloque.status = False
+                self.selected_type = self.items_choose[2]    
                 self.bloque.bloque.selected_columns = self.panel_proper.lista_columnas.selected_option
                 self.panel_proper.kill()
             if event.ui_object_id == '#proper_set_index.#aceptar':
                 self.bloque.status = False
+                self.selected_type = self.items_choose[2]    
                 self.bloque.bloque.index = self.panel_proper.lista_columnas.get_single_selection()
                 self.panel_proper.kill()
             
             # Carga
-            if event.ui_object_id == '#proper_tabdin.#aceptar':
-                self.bloque.status = False
-                # self.bloque.bloque.index_barra = self.panel_proper.indice.selected_option
-                #self.bloque.bloque.type_barra = 0 if self.panel_proper.criterio.selected_option == 'Conteo' else 1 if self.panel_proper.criterio.selected_option == 'Suma' else 2
-                self.bloque.bloque.columna = self.panel_proper.columna.selected_option
-                self.bloque.bloque.valor = self.panel_proper.valor.selected_option
-                self.bloque.bloque.agg = self.panel_proper.operacion.get_multi_selection()
-                self.panel_proper.kill()
+            
             if event.ui_object_id == '#proper_repnan.#aceptar':
                 self.bloque.status = False
                 self.bloque.bloque.value = self.panel_proper.value.text
@@ -321,6 +326,14 @@ class GuiManager:
                 self.bloque.bloque.columna2 = self.panel_proper.atributo2.selected_option
                 self.bloque.bloque.type_barra = 0 if self.panel_proper.criterio.selected_option == 'Conteo' else 1 
                 self.panel_proper.kill()
+            if event.ui_object_id == '#proper_tabdin.#aceptar':
+                self.bloque.status = False
+                # self.bloque.bloque.index_barra = self.panel_proper.indice.selected_option
+                #self.bloque.bloque.type_barra = 0 if self.panel_proper.criterio.selected_option == 'Conteo' else 1 if self.panel_proper.criterio.selected_option == 'Suma' else 2
+                self.bloque.bloque.columna = self.panel_proper.columna.selected_option
+                self.bloque.bloque.valor = self.panel_proper.valor.selected_option
+                self.bloque.bloque.agg = self.panel_proper.operacion.get_multi_selection()
+                self.panel_proper.kill()
 
             #### Análisis 
             if event.ui_object_id == '#proper_anauni.#aceptar':
@@ -344,7 +357,6 @@ class GuiManager:
             if event.ui_object_id == '#proper_operone.#aceptar':
                 self.bloque.status = False
                 self.bloque.bloque.new_variable = self.panel_proper.new_name.text
-                print('####')
                 self.bloque.bloque.operation = self.panel_proper.operacion.selected_option
                 self.bloque.bloque.selected_variable = self.panel_proper.variable.selected_option
                 self.bloque.bloque.valor = self.panel_proper.valor.text
@@ -379,7 +391,22 @@ class GuiManager:
                 self.bloque.status = False
                 self.bloque.bloque.selected_variables = self.panel_proper.lista_columnas.get_multi_selection() 
                 self.panel_proper.kill()
-                        
+            if event.ui_object_id == '#proper_normcols.#aceptar':
+                self.bloque.status = False
+                self.bloque.bloque.selected_variables = self.panel_proper.lista_columnas.get_multi_selection() 
+                self.bloque.bloque.minimo = self.panel_proper.minimo.text          
+                self.bloque.bloque.maximo = self.panel_proper.maximo.text          
+                self.panel_proper.kill()
+            if event.ui_object_id == '#proper_ordenar.#aceptar':
+                self.bloque.status = False
+                self.bloque.bloque.selected_variable = self.panel_proper.variable.selected_option 
+                self.bloque.bloque.aleatorio = self.panel_proper.aleatorio_estado.selected_option 
+                self.panel_proper.kill()
+            if event.ui_object_id == '#proper_muestra.#aceptar':
+                self.bloque.status = False
+                self.bloque.bloque.valor = self.panel_proper.entry_porc.text        
+                self.bloque.bloque.aleatorio = self.panel_proper.aleatorio_estado.selected_option 
+                self.panel_proper.kill()
             
             if event.ui_object_id == 'panel.#new':  # Crear nuevo módulo
                 worker.num_modulos+=1
@@ -538,12 +565,44 @@ class GuiManager:
     def exec_actions(self, screen, position, worker):
         if self.del_line:
             pygame.mouse.set_visible(False)
+            self.delete_line_rect.x = position[0]
+            self.delete_line_rect.y = position[1] 
             screen.blit(self.delete_line, position)
             for modulo in worker.modulos:
                 for conexion in modulo.conections:
-                    if self.delete_line.rect.collidepoint(conexion):
-                        print('ola')
+                    for tramo in conexion.puntos_internos:
+                        if self.delete_line_rect.collidepoint(tramo):
+                            ini = conexion.elem1
+                            fin = conexion.elem2
+                            valido = False
+                            for bloque in modulo.data_blocks:
+                                if bloque==fin:
+                                    if not bloque.out_elements:
+                                        valido = True
+                            if valido:
+                                for bloque2 in modulo.data_blocks:
+                                    if bloque2==ini:
+                                        print(bloque2.name)
+                                        bloque2.out_elements.remove(fin)
+                                    if bloque2==fin:
+                                        print(bloque2.name)
+                                        print(bloque2.bloque.data)
+                                        bloque2.bloque.data = pd.DataFrame()
+                                        print(bloque2.bloque.data)
+                                        bloque2.status = False
+                                        bloque2.in_elements.remove(ini)
+                                modulo.conections.remove(conexion)
+                            else:
+                                size_alert = (300, 150)
+                                salida = UIMessageWindow(pygame.Rect((self.window_size[0]/2-size_alert[0]/2, 
+                                                self.window_size[1]/2-size_alert[1]/2), size_alert), html_message='El bloque de la salida no puede tener elementos conectados', window_title='Error', manager=self.manager)
 
+                                print(dir(salida))
+                                salida.set_blocking(True)
+                                self.del_line = False
+                                self.tareas[2] = 0
+                                pygame.mouse.set_visible(True)
+                                break
 
     def check_actions(self, position, worker):
         if self.tareas[2]:
@@ -552,34 +611,24 @@ class GuiManager:
             self.hold_line = True            
         if self.tareas[0]:
             for modulo in worker.modulos:
-                # if modulo.id == 1:
                 for bloque in modulo.data_blocks:
                     if bloque.selected:
-                        bloque.bloque.procesar()
-                        if not bloque.bloque.error:
-                            print('inp')
-                            bloque.status = True
+                        if bloque.type=='Ingesta':
+                            bloque.bloque.procesar()
                         else:
-                            print('op')
+                            if not bloque.bloque.data.empty:
+                                bloque.bloque.procesar()
+                        if not bloque.bloque.error:
+                            bloque.status = True
+                            bloque.selected = False
+                        else:
                             size_alert = (300, 150)
                             UIMessageWindow(pygame.Rect((self.window_size[0]/2-size_alert[0]/2, 
                                             self.window_size[1]/2-size_alert[1]/2), size_alert), html_message=bloque.bloque.msg, window_title='Error', manager=self.manager)
-                        """if not bloque.in_elements:
-                            lista_iniciales.append(bloque)   
-                    modulo.dict_rutas['nivel1'] = lista_iniciales
-                    modulo.build_rutas(lista_iniciales)     
-                print(modulo.dict_rutas)  
-                for ruta, mod in modulo.dict_rutas.items():
-                    if mod:
-                        for bloque in mod:
-                            #print(bloque.bloque.procesar())
-                            #print(ruta, bloque.action)    
-                            #print(ruta, bloque.type)   
-                            print('--')    """   
+
             self.tareas[0] = 0 
     def check_block(self, bloque, position, size=(400, 300)):
         """Acá entra si se hace click derecho"""
-        print(bloque.id)
         self.bloque = bloque
         if bloque.action=='Fichero':
             self.panel_proper = propiedades.ProperLoad(pygame.Rect((position[0]/2-size[0]/2, position[1]/2-size[1]/2), (size[0]+130, size[1]-100)), self.manager, bloque)
@@ -635,10 +684,16 @@ class GuiManager:
         if bloque.action=='Filtrar una columna':
             self.panel_proper = propiedades.ProperFilterOne(pygame.Rect((position[0]/2-size[0]/2, position[1]/2-size[1]/2), (size[0]+50, size[1])), self.manager, bloque)
         if bloque.action=='Filtrar dos columnas':
-            self.panel_proper = propiedades.ProperFilterTwo(pygame.Rect((position[0]/2-size[0]/2, position[1]/2-size[1]/2), (size[0]+150, size[1]+70)), self.manager, bloque)
+            self.panel_proper = propiedades.ProperFilterTwo(pygame.Rect((position[0]/2-size[0]/2, position[1]/2-size[1]/2), (size[0]+180, size[1]+70)), self.manager, bloque)
         if bloque.action=='Seleccionar columnas':
             self.panel_proper = propiedades.ProperSelectColumns(pygame.Rect((position[0]/2-size[0]/2, position[1]/2-size[1]/2), (size[0]+50, size[1])), self.manager, bloque)
-
+        if bloque.action=='Normalizar':
+            self.panel_proper = propiedades.ProperNormColumns(pygame.Rect((position[0]/2-size[0]/2, position[1]/2-size[1]/2), (size[0]+50, size[1])), self.manager, bloque)
+        if bloque.action=='Ordenar':
+            self.panel_proper = propiedades.ProperOrdenar(pygame.Rect((position[0]/2-size[0]/2, position[1]/2-size[1]/2), (size[0]+50, size[1])), self.manager, bloque)
+        if bloque.action=='Muestra':
+            self.panel_proper = propiedades.ProperMuestra(pygame.Rect((position[0]/2-size[0]/2, position[1]/2-size[1]/2), (size[0]+50, size[1]-50)), self.manager, bloque)
+        
         if bloque.action=='CSV':
             self.panel_proper = propiedades.ProperSave(pygame.Rect((position[0]/2-size[0]/2, position[1]/2-size[1]/2), (size[0], size[1]-100)), self.manager, bloque)
     
@@ -654,3 +709,5 @@ class GuiManager:
         #             bloque.selected = False
         self.selected_block = False
         self.tareas = [0]*5
+        self.del_line = False
+        pygame.mouse.set_visible(True)

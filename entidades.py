@@ -247,6 +247,11 @@ class MainWorker(pygame.sprite.Sprite):
             if modulo.name == selected:
                 for conexion in modulo.conections:
                     conexion.draw(screen)
+                    # if borrar:
+                    #     for tramo in conexion.puntos_internos:
+                    #         if posicion_borrar.collidepoint(tramo):
+                    #             print('borrar')
+
                 for data in modulo.data_blocks:
                     data.draw(screen)
                     for boton in data.botones:
